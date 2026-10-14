@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>amir playground</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="header">
+        <h1>amir playground</h1>
+        <p class="sub">Three layers · coloring + motion + beat · each with its own layout</p>
+      </header>
+
+      <div class="hero-actions">
+        <button type="button" class="random random-hero" id="random">Randomize all &amp; send</button>
+        <button
+          type="button"
+          class="send send-secondary"
+          id="randomPreview"
+          title="Roll coloring, motion and beat on the sim only — does not send to the rings"
+        >
+          Randomize all
+        </button>
+        <button type="button" class="send send-secondary" id="send">Send current</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+
+      <section class="summary" id="summary">
+        <div class="layer-bar layer-bar-coloring">
+          <div class="layer-bar-top">
+            <span class="chip chip-coloring" id="coloringChipLabel">coloring</span>
+          </div>
+          <div class="layer-params-with-rand">
+            <div class="layer-params">
+              <div class="dial" id="colorfulnessField">
+                <div class="dial-head">
+                  <div class="dial-label">colorfulness</div>
+                  <div class="dial-viz" id="colorfulnessViz" data-kind="colorfulness" data-choice="random" aria-hidden="true">
+                    <span class="viz-colorfulness"></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="colorfulnessOptions" role="group" aria-label="Colorfulness"></div>
+                <span class="hint" id="colorfulnessHint">how many colors &amp; how far apart</span>
+              </div>
+              <div class="dial" id="scatterField">
+                <div class="dial-head">
+                  <div class="dial-label">scatter</div>
+                  <div class="dial-viz" id="scatterViz" data-kind="scatter" data-choice="random" aria-hidden="true">
+                    <span class="viz-scatter"></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="scatterOptions" role="group" aria-label="Scatter"></div>
+                <span class="hint" id="scatterHint"
+                  >placement style — each option only uses matching layouts</span
+                >
+              </div>
+              <div class="dial" id="vividnessField">
+                <div class="dial-head">
+                  <div class="dial-label">vividness</div>
+                  <div class="dial-viz" id="vividnessViz" data-kind="vividness" data-choice="random" aria-hidden="true">
+                    <span class="viz-vividness"></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="vividnessOptions" role="group" aria-label="Vividness"></div>
+                <span class="hint" id="vividnessHint"
+                  >pastel ↔ vivid — biases saturation (hues stay random)</span
+                >
+              </div>
+            </div>
+            <button type="button" class="layer-rand" data-rand="coloring" title="Randomize coloring">
+              ↻ random
+            </button>
+          </div>
+        </div>
+
+        <div class="layer-bar layer-bar-motion">
+          <div class="layer-bar-top">
+            <span class="chip chip-motion" id="motionChipLabel">motion</span>
+          </div>
+          <div class="layer-param-with-rand">
+            <div class="layer-params layer-params-motion">
+              <div class="dial dial-motion" id="motionPresenceField">
+                <div class="dial-head">
+                  <div class="dial-label">motion</div>
+                  <div class="dial-viz" id="motionPresenceViz" data-kind="presence" data-choice="random" aria-hidden="true">
+                    <span class="viz-presence"></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="motionPresenceOptions" role="group" aria-label="Motion on or off"></div>
+                <span class="hint" id="motionPresenceHint">off = static coloring · on = always animate · random = mix</span>
+              </div>
+              <div class="dial dial-motion" id="motionSpeedField">
+                <div class="dial-head">
+                  <div class="dial-label">speed</div>
+                  <div class="dial-viz" id="motionSpeedViz" data-kind="speed" data-choice="random" aria-hidden="true">
+                    <span class="viz-speed"><i></i><i></i><i></i></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="motionSpeedOptions" role="group" aria-label="Motion speed"></div>
+                <span class="hint" id="motionSpeedHint">how many cycles per loop</span>
+              </div>
+              <div class="dial dial-motion" id="motionPhaseField">
+                <div class="dial-head">
+                  <div class="dial-label">phase</div>
+                  <div class="dial-viz" id="motionPhaseViz" data-kind="phase" data-choice="random" aria-hidden="true">
+                    <span class="viz-phase"
+                      ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+                    ></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="motionPhaseOptions" role="group" aria-label="Motion phase"></div>
+                <span class="hint" id="motionPhaseHint"
+                  >1 = all synced · 2 = alternate · 4 = four sets ×3</span
+                >
+              </div>
+            </div>
+            <button type="button" class="layer-rand" data-rand="motion" title="Randomize motion">
+              ↻ random
+            </button>
+          </div>
+        </div>
+
+        <div class="layer-bar layer-bar-beat">
+          <div class="layer-bar-top">
+            <span class="chip chip-beat" id="beatChipLabel">beat</span>
+          </div>
+          <div class="layer-param-with-rand">
+            <div class="layer-params layer-params-beat">
+              <div class="dial dial-beat" id="beatPresenceField">
+                <div class="dial-head">
+                  <div class="dial-label">beat</div>
+                  <div class="dial-viz" id="beatPresenceViz" data-kind="beat-presence" data-choice="random" aria-hidden="true">
+                    <span class="viz-beat-presence"></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="beatPresenceOptions" role="group" aria-label="Beat on or off"></div>
+                <span class="hint" id="beatPresenceHint">off = steady brightness · on = always hit the beat · random = mix</span>
+              </div>
+              <div class="dial dial-beat" id="beatBpmField">
+                <div class="dial-head">
+                  <div class="dial-label">bpm</div>
+                  <div class="dial-viz" id="beatBpmViz" data-kind="bpm" data-choice="random" aria-hidden="true">
+                    <span class="viz-bpm"></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="beatBpmOptions" role="group" aria-label="Beat tempo"></div>
+                <span class="hint" id="beatBpmHint">tempo of the track — hits land on this grid</span>
+              </div>
+              <div class="dial dial-beat" id="beatDecayField">
+                <div class="dial-head">
+                  <div class="dial-label">decay</div>
+                  <div class="dial-viz" id="beatDecayViz" data-kind="decay" data-choice="random" aria-hidden="true">
+                    <span class="viz-decay"><i></i><i></i><i></i><i></i></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="beatDecayOptions" role="group" aria-label="Beat decay"></div>
+                <span class="hint" id="beatDecayHint">how fast each hit fades — tight = drum hit, loose = swell</span>
+              </div>
+              <div class="dial dial-beat" id="beatDepthField">
+                <div class="dial-head">
+                  <div class="dial-label">depth</div>
+                  <div class="dial-viz" id="beatDepthViz" data-kind="depth" data-choice="random" aria-hidden="true">
+                    <span class="viz-depth"><i></i><i></i><i></i><i></i></span>
+                  </div>
+                </div>
+                <div class="dial-options" id="beatDepthOptions" role="group" aria-label="Beat depth"></div>
+                <span class="hint" id="beatDepthHint">how dark between hits</span>
+              </div>
+            </div>
+            <button type="button" class="layer-rand" data-rand="beat" title="Randomize beat">
+              ↻ random
+            </button>
+          </div>
+        </div>
+
+        <div class="summary-swatches" id="summarySwatches"></div>
+        <div class="sim-wrap">
+          <canvas id="ringSim" width="680" height="680" aria-label="LED ring simulation"></canvas>
+        </div>
+        <p class="explain-legend">
+          <span>12 rings · clock layout · same as led-rings simulator</span>
+        </p>
+        <p class="summary-blurb" id="summaryBlurb">Solid color on every ring.</p>
+        <p class="summary-motion" id="summaryMotion">Motion: none</p>
+        <p class="summary-motion summary-beat" id="summaryBeat">Beat: none</p>
+      </section>
+
+      <details class="details" id="details">
+        <summary class="details-toggle">
+          <span>Full selection details</span>
+          <span class="details-hint" id="detailsHint">expand to edit layers</span>
+        </summary>
+
+        <div class="details-body">
+          <!-- COLORING LAYER -->
+          <section class="layer-card" data-layer="coloring">
+            <div class="section-head">
+              <div class="section-label">layer · coloring</div>
+              <button type="button" class="section-rand" data-rand="coloring">randomize layer</button>
+            </div>
+            <p class="layer-note">Colorfulness, scatter, and vividness are on the coloring bar above.</p>
+
+            <div class="section-label kinds-shortcut-label">kind shortcut</div>
+            <div class="kinds-row" aria-label="Coloring kind shortcut">
+              <button type="button" class="kind active" data-kind="const">const</button>
+              <button type="button" class="kind" data-kind="2">2 colors</button>
+              <button type="button" class="kind" data-kind="4">4 colors</button>
+              <button type="button" class="kind" data-kind="8">8 colors</button>
+              <button type="button" class="kind" data-kind="colorful">colorful</button>
+            </div>
+
+            <div class="layer-sub" id="layoutPanel" hidden>
+              <div class="section-label">coloring layout</div>
+              <div class="layout-toolbar">
+                <span class="layout-count" id="layoutCount"></span>
+                <input
+                  type="search"
+                  id="layoutFilter"
+                  class="layout-filter"
+                  placeholder="filter layouts…"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="layouts" id="layouts" aria-label="Coloring layout"></div>
+              <p class="explain-blurb" id="explainBlurb"></p>
+            </div>
+
+            <div class="layer-sub" id="segmentRow" hidden>
+              <div class="section-label">segment map</div>
+              <div class="segments" id="segments" aria-label="Segment map"></div>
+            </div>
+
+            <div class="layer-sub">
+              <div class="section-label">colors</div>
+              <div id="colorList" class="color-list"></div>
+              <label class="field" id="rangeField" hidden>
+                <span class="label">range <em id="rangeVal">1.00</em></span>
+                <input id="range" type="range" min="0" max="2" step="0.01" value="1" />
+                <span class="hint">1 = full rainbow around the center color</span>
+              </label>
+            </div>
+          </section>
+
+          <!-- MOTION LAYER -->
+          <section class="layer-card" data-layer="motion">
+            <div class="section-head">
+              <div class="section-label">layer · motion</div>
+              <button type="button" class="section-rand" data-rand="motion">randomize layer</button>
+            </div>
+            <p class="layer-note">Motion on/off, speed, and phase are on the bar above. Off keeps coloring static and skips motion when randomizing all.</p>
+
+            <div class="motions" id="motions" aria-label="Motion kind"></div>
+            <p class="motion-blurb" id="motionBlurb">No motion — coloring stays static.</p>
+
+            <div class="layer-sub" id="motionLayoutPanel">
+              <div class="section-label">motion layout</div>
+              <div class="layouts" id="motionLayouts" aria-label="Motion layout"></div>
+              <p class="explain-blurb" id="motionLayoutBlurb"></p>
+            </div>
+
+            <div class="motion-params" id="motionParams"></div>
+          </section>
+          <!-- BEAT LAYER -->
+          <section class="layer-card" data-layer="beat">
+            <div class="section-head">
+              <div class="section-label">layer · beat</div>
+              <button type="button" class="section-rand" data-rand="beat">randomize layer</button>
+            </div>
+            <p class="layer-note">Beat on/off, BPM, decay, and depth are on the bar above. Every kind only lights on the beat grid — sharp attack, then decay.</p>
+
+            <div class="motions" id="beats" aria-label="Beat kind"></div>
+            <p class="motion-blurb" id="beatBlurb">No beat — brightness stays steady.</p>
+
+            <div class="layer-sub" id="beatLayoutPanel">
+              <div class="section-label">beat spread</div>
+              <div class="layouts" id="beatLayouts" aria-label="Beat spread"></div>
+              <p class="explain-blurb" id="beatLayoutBlurb"></p>
+            </div>
+          </section>
+        </div>
+      </details>
+
+      <p class="services" id="services"></p>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

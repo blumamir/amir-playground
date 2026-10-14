@@ -1,0 +1,242 @@
+{
+  "ring1": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring2": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring3": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring4": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring5": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring6": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring7": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring8": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring9": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring10": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring11": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  },
+  "ring12": {
+    "effects": [
+      {
+        "effect_config": {
+          "segments": "all",
+          "start_time": 0,
+          "end_time": 10000
+        },
+        "const_color": {
+          "color": {
+            "hue": 0.66,
+            "sat": 1.0,
+            "val": 1.0
+          }
+        }
+      }
+    ],
+    "duration_ms": 10000,
+    "num_repeats": 0
+  }
+}
