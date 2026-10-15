@@ -1,0 +1,1782 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ring Layout Demo</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --line: #e2e0da;
+    --off: #d9d6cf; --accent: #2f6fde; --chip: #efede8; --chip-on: #1d1d1f; --chip-on-ink: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f0f11; --panel: #18181b; --ink: #ececf0; --muted: #9a9aa3; --line: #2a2a2f;
+      --off: #2a2a30; --accent: #6b9bff; --chip: #24242a; --chip-on: #ececf0; --chip-on-ink: #111;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f0f11; --panel: #18181b; --ink: #ececf0; --muted: #9a9aa3; --line: #2a2a2f;
+    --off: #2a2a30; --accent: #6b9bff; --chip: #24242a; --chip-on: #ececf0; --chip-on-ink: #111;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 28px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; margin-bottom: 20px; }
+  h2 { font-size: 18px; margin: 0 0 4px; }
+  .desc { color: var(--muted); margin: 0 0 14px; font-size: 14px; }
+  .row { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .stage { flex: 0 0 auto; width: min(380px, 100%); }
+  .side { flex: 1 1 280px; min-width: 0; }
+  svg { width: 100%; height: auto; display: block; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .chips button { border: 0; background: var(--chip); color: var(--ink); padding: 6px 12px;
+    border-radius: 999px; font: inherit; font-size: 13px; cursor: pointer; }
+  .chips button.on { background: var(--chip-on); color: var(--chip-on-ink); }
+  .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 0 6px; }
+  .info { font-size: 14px; }
+  .info code, p code { background: var(--chip); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  .beat { display: flex; gap: 4px; margin-top: 10px; }
+  .beat span { width: 18px; height: 6px; border-radius: 3px; background: var(--off); }
+  .beat span.on { background: var(--accent); }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .thumb { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 6px; cursor: pointer; color: var(--ink); font: inherit; text-align: left; }
+  .thumb:hover { border-color: var(--accent); }
+  .thumb canvas { width: 100%; max-width: none; border-radius: 6px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
+  .tags.big { gap: 5px; margin: 10px 0 2px; }
+  .tag { font-size: 10.5px; line-height: 1; padding: 3px 6px; border-radius: 999px; white-space: nowrap;
+    background: hsl(var(--th) 60% 50% / .14); color: hsl(var(--th) 45% 38%); }
+  .tags.big .tag { font-size: 12px; padding: 4px 8px; }
+  .filters { margin: 4px 0 6px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .filters .label { width: 100%; }
+  .tagbtn { border: 1px solid transparent; cursor: pointer; font: inherit; font-size: 12px; padding: 4px 9px; }
+  .tagbtn.on { border-color: hsl(var(--th) 60% 50%); background: hsl(var(--th) 60% 50% / .32); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag { color: hsl(var(--th) 70% 72%); } }
+  :root[data-theme="dark"] .tag { color: hsl(var(--th) 70% 72%); }
+  .mgallery { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  .thumb .why { font-size: 11.5px; line-height: 1.35; color: var(--muted); margin-top: 4px; }
+  .thumb .cap { font-size: 12px; line-height: 1.3; margin-top: 4px; }
+  .mcols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
+  @media (max-width: 700px) { .mcols { grid-template-columns: 1fr; } }
+  .mcol { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .mcol h3 { margin: 2px 0 4px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .mcol h3 i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .mcol .label { margin: 8px 0 4px; font-size: 11px; }
+  .mcol .chips { margin-bottom: 2px; gap: 4px; }
+  .mcol .chips button { padding: 4px 8px; font-size: 12px; }
+  .mcol.disabled .ctl { opacity: .35; pointer-events: none; }
+  .swatch { width: 18px; height: 18px; border-radius: 50%; padding: 0 !important; border: 2px solid transparent !important; }
+  .swatch.on { border-color: var(--ink) !important; }
+  pre.code { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.45; overflow-x: auto; white-space: pre; margin: 10px 0 0; }
+  canvas { width: 100%; max-width: 380px; height: auto; display: block; border-radius: 10px; }
+  .ringtxt { font-size: 13px; font-weight: 600; fill: var(--ink); }
+  .note { font-size: 12px; fill: var(--muted); }
+  .live { position: fixed; right: 16px; bottom: 16px; z-index: 10; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; font-size: 13px;
+    box-shadow: 0 4px 16px rgb(0 0 0 / .12); max-width: calc(100vw - 32px); box-sizing: border-box; }
+  .live input[type=text] { width: 150px; font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  .live button { border: 0; background: var(--chip); color: var(--ink); padding: 4px 10px; border-radius: 999px; font: inherit; cursor: pointer; }
+  .live .st { color: var(--muted); min-width: 0; }
+  .live .bri { display: flex; align-items: center; gap: 6px; }
+  .live .bri input { width: 110px; accent-color: var(--accent); }
+  .live .bri span { width: 3.2em; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .live .st.err { color: #d23; }
+</style>
+</head>
+<body>
+<div class="live" title="Panels 2, 4, 6 and 7: every click builds the current pattern in the page and sends it straight to the Raspberry Pi's sequence (:8082) and trigger (:8083) services">
+  <label><input type="checkbox" id="liveOn" checked> Live to LEDs</label>
+  <input type="text" id="liveHost" value="10.0.1.200" aria-label="Raspberry Pi address">
+  <button id="liveSend">Send</button>
+  <button id="liveRandom" title="Send a random card from the galleries (panels 4, 6 and 7)">Random</button>
+  <button id="liveStop">Stop</button>
+  <label class="bri" title="Global brightness of the whole installation (retained MQTT 'brightness', via the control server on :3080)">☀
+    <input type="range" id="liveBri" min="0" max="100" step="1" value="100" disabled> <span id="liveBriVal">–</span></label>
+  <span class="st" id="liveSt">click a layout or pattern in panel 2, 4, 6 or 7</span>
+</div>
+<main>
+  <h1>Ring layout demo</h1>
+  <p class="sub">The concepts from the <code>led-animation-layout</code> skill. The 12 big rings stand in a circle and ring <code>r</code> sits at <code>r:30</code> on a clock. Each big ring is itself a circle of 12 small rings. The dashed small ring (0) faces the center of the installation.</p>
+
+  <section>
+    <h2>1. Geometry</h2>
+    <p class="desc">Click a ring to see its partners, or play the rotation.</p>
+    <div class="row">
+      <div class="stage"><svg id="geo" viewBox="0 0 380 380"></svg></div>
+      <div class="side">
+        <div class="chips" id="geoModes"></div>
+        <div class="info" id="geoInfo"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="panel2">2. Two-part layouts</h2>
+    <p class="desc">Split the installation into parts A and B by combining a <b>big-ring split</b> (which rings are in group G1 / G2) with an <b>inside split</b> (which half of each ring, s0 / s1), then pick how they combine. Choosing <i>Whole ring</i> or <i>None</i> gives the single-level splits. <b>Whole rings</b>: each big ring belongs entirely to A or B. <b>Segments</b>: inside a big ring you can't pick arbitrary pixels, only whole segments. A group can use several segments (e.g. small rings <code>"0"</code>, <code>"1"</code> and <code>"11"</code>), and different big rings can use different segments. Every pixel of the installation is shown here.</p>
+    <div class="row">
+      <div class="stage" style="width:min(520px,100%)"><canvas id="full" width="1040" height="1040" style="max-width:520px"></canvas></div>
+      <div class="side">
+        <div class="label">1 · Big rings (G1 vs G2)</div>
+        <div class="chips" id="bigChips"></div>
+        <div class="label">2 · Inside each ring (s0 vs s1)</div>
+        <div class="chips" id="insideChips"></div>
+        <div class="label">3 · Combine</div>
+        <div class="chips" id="combChips"></div>
+        <div class="label">Or a classic option</div>
+        <div class="chips" id="classicChips"></div>
+        <div class="label">Or a special shape</div>
+        <div class="chips" id="specialChips"></div>
+        <div class="label">Use</div>
+        <div class="chips" id="segUseChips"></div>
+        <div class="info" id="segSplitInfo"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Segments inside one big ring</h2>
+    <p class="desc">Each big ring is a circle of 12 small rings with 12 pixels each (144 pixels). A snake effect travels along the segment's <code>relPos</code>, so the segment decides the shape of the motion. Dim pixels are not in the segment.</p>
+    <div class="row">
+      <div class="stage"><canvas id="seg" width="760" height="760"></canvas></div>
+      <div class="side">
+        <div class="chips" id="segChips"></div>
+        <div class="info" id="segInfo"></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>4. Gallery</h2>
+    <p class="desc">Every option as a still picture (A = blue, B = orange, dark = off). Click one to load it into panel 2 and animate it.</p>
+    <div id="gallery"></div>
+  </section>
+  <section>
+    <h2 id="panel5">5. Four-part layouts</h2>
+    <p class="desc">The same idea with four parts, A, B, C and D. Build them either from <b>4-way splits</b> (four ring groups and/or four quarters inside each ring) or as a <b>2×2 cross</b> of any two-way big split with any two-way inside split from panel 2.</p>
+    <div class="row">
+      <div class="stage" style="width:min(520px,100%)"><canvas id="full4" width="1040" height="1040" style="max-width:520px"></canvas></div>
+      <div class="side">
+        <div class="label">4-way · big rings (G1–G4)</div>
+        <div class="chips" id="big4Chips"></div>
+        <div class="label">4-way · inside each ring (q1–q4)</div>
+        <div class="chips" id="inside4Chips"></div>
+        <div class="label">4-way · combine</div>
+        <div class="chips" id="comb4Chips"></div>
+        <div class="label">Or 2×2 cross · big split</div>
+        <div class="chips" id="crossBigChips"></div>
+        <div class="label">2×2 cross · inside split</div>
+        <div class="chips" id="crossInsideChips"></div>
+        <div class="label">Use</div>
+        <div class="chips" id="use4Chips"></div>
+        <div class="info" id="info4"></div>
+      </div>
+    </div>
+    <div id="gallery4"></div>
+  </section>
+  <section>
+    <h2 id="panel6">6. Motion for two-part layouts</h2>
+    <p class="desc">Give each part its own snake. With a <b>ring-level split</b> each group of rings is fully independent: any path, direction, tempo and wave. With an <b>inside split</b> both parts live in the same rings, and every effect on a segment touches all of its pixels, so they <b>share one motion</b> and differ only in color. Pick a preset or tweak each part.</p>
+    <div class="label">Presets</div>
+    <div class="chips" id="mPresetChips"></div>
+    <div class="row" style="margin-top:8px">
+      <div class="stage" style="width:min(520px,100%)"><canvas id="fullM" width="1040" height="1040" style="max-width:520px"></canvas>
+        <div class="beat" id="mBeat"></div></div>
+      <div class="side">
+        <div class="label">Layout · ring groups (independent motion)</div>
+        <div class="chips" id="mBigChips"></div>
+        <div class="label">Layout · inside split (shared motion, two colors)</div>
+        <div class="chips" id="mInsideChips"></div>
+        <div class="mcols">
+          <div class="mcol" id="mColA"></div>
+          <div class="mcol" id="mColB"></div>
+        </div>
+      </div>
+    </div>
+    <div class="info" id="mInfo"></div>
+    <pre class="code" id="mCode"></pre>
+    <h3 style="margin:26px 0 2px;font-size:16px">Motion gallery</h3>
+    <p class="desc">Every card is live. Click one to load it into the editor above.</p>
+    <div id="mGalleryWrap"></div>
+  </section>
+  <section>
+    <h2 id="panel7">7. Stacked snakes</h2>
+    <p class="desc">Two snakes on the same rings, one on top of the other. The renderer (<code>kivsee-render</code>) applies effects in order to each pixel, so <b>how</b> the second snake lands on the first decides the look:
+      <b>Intersect</b> (<code>snake</code> × <code>snake</code>: light only where both are lit),
+      <b>Add</b> (<code>snake</code> then <code>snake_brightness</code> increase: both are visible, optionally in a second color via <code>snake_hue</code>),
+      <b>Shadow</b> (<code>snake_brightness</code> decrease: a dark snake cuts through the light),
+      <b>Color band</b> (<code>snake_hue</code>: a moving band of shifted color). Each layer can use a different path.</p>
+    <div class="label">Presets</div>
+    <div class="chips" id="sPresetChips"></div>
+    <div class="row" style="margin-top:8px">
+      <div class="stage" style="width:min(520px,100%)"><canvas id="fullS" width="1040" height="1040" style="max-width:520px"></canvas></div>
+      <div class="side">
+        <div class="label">Blend (how layer 2 lands on layer 1)</div>
+        <div class="chips" id="sBlendChips"></div>
+        <div class="label">Layer 2 style</div>
+        <div class="chips" id="sStyleChips"></div>
+        <div class="label">Hue shift (Add / Color band)</div>
+        <div class="chips" id="sHueOffChips"></div>
+        <div class="label">Rings</div>
+        <div class="chips" id="sLayoutChips"></div>
+        <div class="mcols">
+          <div class="mcol" id="sColA"></div>
+          <div class="mcol" id="sColB"></div>
+        </div>
+      </div>
+    </div>
+    <div class="info" id="sInfo"></div>
+    <pre class="code" id="sCode"></pre>
+    <h3 style="margin:26px 0 2px;font-size:16px">Stacked-snake gallery</h3>
+    <p class="desc">Every card is live. Click one to load it into the editor above.</p>
+    <div id="sGalleryWrap"></div>
+  </section>
+</main>
+
+<script>
+const SEGMENTS = {"all":[0,0.007,0.014,0.021,0.028,0.035,0.042,0.049,0.0559,0.0629,0.0699,0.0769,0.0839,0.0909,0.0979,0.1049,0.1119,0.1189,0.1259,0.1329,0.1399,0.1469,0.1538,0.1608,0.1678,0.1748,0.1818,0.1888,0.1958,0.2028,0.2098,0.2168,0.2238,0.2308,0.2378,0.2448,0.2517,0.2587,0.2657,0.2727,0.2797,0.2867,0.2937,0.3007,0.3077,0.3147,0.3217,0.3287,0.3357,0.3427,0.3497,0.3566,0.3636,0.3706,0.3776,0.3846,0.3916,0.3986,0.4056,0.4126,0.4196,0.4266,0.4336,0.4406,0.4476,0.4545,0.4615,0.4685,0.4755,0.4825,0.4895,0.4965,0.5035,0.5105,0.5175,0.5245,0.5315,0.5385,0.5455,0.5524,0.5594,0.5664,0.5734,0.5804,0.5874,0.5944,0.6014,0.6084,0.6154,0.6224,0.6294,0.6364,0.6434,0.6503,0.6573,0.6643,0.6713,0.6783,0.6853,0.6923,0.6993,0.7063,0.7133,0.7203,0.7273,0.7343,0.7413,0.7483,0.7552,0.7622,0.7692,0.7762,0.7832,0.7902,0.7972,0.8042,0.8112,0.8182,0.8252,0.8322,0.8392,0.8462,0.8531,0.8601,0.8671,0.8741,0.8811,0.8881,0.8951,0.9021,0.9091,0.9161,0.9231,0.9301,0.9371,0.9441,0.951,0.958,0.965,0.972,0.979,0.986,0.993,1],"0":[0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"1":[null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"2":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"3":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"4":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"5":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"6":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"7":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"8":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"9":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"10":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,null,null,null,null,null,null,null,null,null,null,null,null],"11":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167],"centric":[0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167],"updown":[0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.4167,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.5,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5833,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.6667,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.75,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.8333,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.9167,0,0.0833,0.1667,0.25,0.3333,0.4167,0.5,0.5833,0.6667,0.75,0.8333],"arc":[0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429,0,0.1429,0.2857,0.4286,0.5714,0.7143,0.8571,0.7143,0.5714,0.4286,0.2857,0.1429],"ind":[0,0,0,0,0,0,0,0,0,0,0,0,0.0833,0.0833,0.0833,0.0833,0.0833,0.0833,0.0833,0.0833,0.0833,0.0833,0.0833,0.0833,0.1667,0.1667,0.1667,0.1667,0.1667,0.1667,0.1667,0.1667,0.1667,0.1667,0.1667,0.1667,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.3333,0.3333,0.3333,0.3333,0.3333,0.3333,0.3333,0.3333,0.3333,0.3333,0.3333,0.3333,0.4167,0.4167,0.4167,0.4167,0.4167,0.4167,0.4167,0.4167,0.4167,0.4167,0.4167,0.4167,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5833,0.5833,0.5833,0.5833,0.5833,0.5833,0.5833,0.5833,0.5833,0.5833,0.5833,0.5833,0.6667,0.6667,0.6667,0.6667,0.6667,0.6667,0.6667,0.6667,0.6667,0.6667,0.6667,0.6667,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.8333,0.8333,0.8333,0.8333,0.8333,0.8333,0.8333,0.8333,0.8333,0.8333,0.8333,0.8333,0.9167,0.9167,0.9167,0.9167,0.9167,0.9167,0.9167,0.9167,0.9167,0.9167,0.9167,0.9167],"b1":[0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null,0,null,null],"b2":[null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0,null,0,0],"rand":[0.23,0.74,0.14,0.86,0.59,0.04,0.91,0.33,0.63,0.51,0.77,0.17,0.98,0.22,0.42,0.88,0.67,0.31,0.53,0.11,0.94,0.35,0.69,0.28,0.76,0.49,0.08,0.87,0.21,0.39,0.95,0.12,0.61,0.47,0.02,0.84,0.18,0.56,0.73,0.25,0.99,0.66,0.37,0.05,0.89,0.3,0.55,0.71,0.26,0.97,0.62,0.1,0.83,0.44,0.07,0.75,0.34,0.93,0.19,0.5,0.79,0.13,0.68,0.24,0.96,0.36,0.09,0.82,0.41,0.06,0.92,0.29,0.7,0.15,0.58,0.46,0.01,0.8,0.2,0.6,0.38,0.93,0.16,0.48,0.85,0.32,0.06,0.9,0.4,0.03,0.78,0.57,0.27,0.65,0.45,0.0,0.81,0.22,0.69,0.52,0.35,0.98,0.17,0.64,0.43,0.09,0.72,0.31,0.55,0.08,0.74,0.18,0.66,0.39,0.04,0.88,0.23,0.49,0.12,0.93,0.6,0.25,0.76,0.53,0.07,0.83,0.19,0.67,0.45,0.1,0.86,0.36,0.01,0.79,0.28,0.62,0.16,0.5,0.92,0.33,0.13,0.97,0.61,0.05]};
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const BPM = 120, BEAT_MS = 60000 / BPM;
+const NS = 'http://www.w3.org/2000/svg';
+const pos = (r, R = 140, c = 190) => {
+  const a = (r + 0.5) * Math.PI / 6;
+  return [c + R * Math.sin(a), c - R * Math.cos(a)];
+};
+const hsl = (h, l = 55, s = 85) => `hsl(${h} ${s}% ${l}%)`;
+
+function chips(el, items, onPick, initial) {
+  el.innerHTML = '';
+  items.forEach(it => {
+    const b = document.createElement('button');
+    b.textContent = it.label;
+    b.onclick = () => { [...el.children].forEach(c => c.classList.remove('on')); b.classList.add('on'); onPick(it); };
+    if (it.id === initial) b.classList.add('on');
+    el.appendChild(b);
+  });
+}
+
+function buildCircle(svg, onClick) {
+  const nodes = {};
+  // clock reference ticks
+  const g0 = document.createElementNS(NS, 'g');
+  [['12', 0], ['3', 3], ['6', 6], ['9', 9]].forEach(([t, h]) => {
+    const a = h * Math.PI / 6, x = 190 + 178 * Math.sin(a), y = 190 - 178 * Math.cos(a);
+    const tx = document.createElementNS(NS, 'text');
+    tx.setAttribute('x', x); tx.setAttribute('y', y + 4); tx.setAttribute('text-anchor', 'middle');
+    tx.setAttribute('class', 'note'); tx.textContent = t + ':00';
+    g0.appendChild(tx);
+  });
+  const cc = document.createElementNS(NS, 'circle');
+  cc.setAttribute('cx', 190); cc.setAttribute('cy', 190); cc.setAttribute('r', 140);
+  cc.setAttribute('fill', 'none'); cc.setAttribute('stroke', 'var(--line)'); cc.setAttribute('stroke-dasharray', '3 5');
+  g0.appendChild(cc);
+  svg.appendChild(g0);
+  for (let r = 1; r <= 12; r++) {
+    const [x, y] = pos(r);
+    const g = document.createElementNS(NS, 'g');
+    g.style.cursor = onClick ? 'pointer' : 'default';
+    const hit = document.createElementNS(NS, 'circle');            // click target + outline
+    hit.setAttribute('cx', x); hit.setAttribute('cy', y); hit.setAttribute('r', 27);
+    hit.setAttribute('fill', 'transparent'); hit.setAttribute('stroke-width', 2);
+    g.appendChild(hit);
+    const smalls = [];
+    const toCenter = (r + 0.5) * 30 + 180;                         // direction from this big ring to the installation center
+    for (let k = 0; k < 12; k++) {
+      const a = (toCenter + k * 30) * Math.PI / 180;               // small ring k, clockwise from the center-facing side
+      const sc = document.createElementNS(NS, 'circle');
+      sc.setAttribute('cx', x + 20 * Math.sin(a)); sc.setAttribute('cy', y - 20 * Math.cos(a));
+      sc.setAttribute('r', 4.6); sc.setAttribute('fill', 'none'); sc.setAttribute('stroke-width', 2.4);
+      sc.setAttribute('stroke', 'var(--off)');
+      if (k === 0) sc.setAttribute('stroke-dasharray', '2 1.2');
+      g.appendChild(sc); smalls.push(sc);
+    }
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', x); t.setAttribute('y', y + 5); t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('class', 'ringtxt'); t.textContent = r;
+    g.appendChild(t);
+    if (onClick) g.onclick = () => onClick(r);
+    svg.appendChild(g);
+    nodes[r] = { hit, smalls, t };
+  }
+  return nodes;
+}
+function paint(nodes, r, fill, stroke) {
+  nodes[r].smalls.forEach(sc => sc.setAttribute('stroke', fill || 'var(--off)'));
+  nodes[r].hit.setAttribute('stroke', stroke || 'none');
+}
+
+/* ---------- 1. Geometry ---------- */
+const geoNodes = buildCircle(document.getElementById('geo'), r => { geo.sel = r; });
+const geo = { mode: 'pairs', sel: 1 };
+const opp = r => ((r + 5) % 12) + 1;
+const mirLR = r => ((22 - r) % 12) + 1;   // r ↔ 11−r (mod 12)
+const mirTB = r => ((28 - r) % 12) + 1;   // r ↔ 5−r (mod 12)
+chips(document.getElementById('geoModes'), [
+  { id: 'pairs', label: 'Partners of a ring' },
+  { id: 'cw', label: 'Rotation clockwise (1→12)' },
+  { id: 'ccw', label: 'Rotation counter-clockwise' },
+  { id: 'halves', label: 'Physical halves' },
+], it => geo.mode = it.id, 'pairs');
+
+function drawGeo(now) {
+  const info = document.getElementById('geoInfo');
+  for (let r = 1; r <= 12; r++) paint(geoNodes, r);
+  if (geo.mode === 'pairs') {
+    const r = geo.sel;
+    paint(geoNodes, r, hsl(45, 60), 'var(--ink)');
+    const o = opp(r), lr = mirLR(r), tb = mirTB(r);
+    paint(geoNodes, o, hsl(210));
+    paint(geoNodes, lr, hsl(330));
+    paint(geoNodes, tb, hsl(140, 50));
+    info.innerHTML = `Ring <b>${r}</b> is at ${r}:30.
+      <div class="legend">
+        <span><i style="background:${hsl(210)}"></i>Opposite (r+6): <b>${o}</b></span>
+        <span><i style="background:${hsl(330)}"></i>Left/right mirror: <b>${lr}</b></span>
+        <span><i style="background:${hsl(140, 50)}"></i>Top/bottom mirror: <b>${tb}</b></span>
+      </div>`;
+  } else if (geo.mode === 'cw' || geo.mode === 'ccw') {
+    const t = (now / (BEAT_MS * 6)) % 1;               // one lap = 6 beats
+    for (let r = 1; r <= 12; r++) {
+      let ph = (r - 1) / 12;                           // phase across all rings
+      if (geo.mode === 'ccw') ph = 1 - ph;
+      const d = ((t - ph) % 1 + 1) % 1;                // distance behind the head
+      const v = Math.max(0, 1 - d / 0.35);
+      if (v > 0) paint(geoNodes, r, hsl(190, 25 + 40 * v));
+    }
+    info.innerHTML = geo.mode === 'cw'
+      ? `Stepping 1→12, or <code>phase(1, …)</code> across <code>all</code>, moves <b>clockwise</b>.`
+      : `Stepping 12→1, or <code>phase(-1, …)</code>, moves <b>counter-clockwise</b>.`;
+  } else {
+    const right = [12, 1, 2, 3, 4, 5], top = [9, 10, 11, 12, 1, 2];
+    const showTop = Math.floor(now / 2000) % 2;
+    for (let r = 1; r <= 12; r++) {
+      const inA = showTop ? top.includes(r) : right.includes(r);
+      paint(geoNodes, r, inA ? hsl(210) : hsl(30));
+    }
+    info.innerHTML = showTop
+      ? `<b>Top</b> = 9,10,11,12,1,2 &nbsp; <b>Bottom</b> = 3–8`
+      : `<b>Right</b> = 12,1,2,3,4,5 &nbsp; <b>Left</b> = 6–11`;
+    info.innerHTML += `<p>No ring sits exactly at 12, 3, 6 or 9. Each of those points falls between a pair: 11|12, 2|3, 5|6 and 8|9.</p>
+      <p>The group names in <code>ring-elements.ts</code> are not physical sides. <code>left</code> = 1–6 is the right/lower-right side.</p>`;
+  }
+}
+
+const USES = [
+  { id: 'colors', label: 'Two colors' },
+  { id: 'beats', label: 'Alternating beats' },
+  { id: 'conv', label: 'Conversation (4 + 4 beats)' },
+];
+const HA = 215, HB = 25;
+
+/* ---------- 3. Segments ---------- */
+const SEG_DESC = {
+  all: 'One long path through all 144 pixels: small ring 0, then 1, 2… around the big ring.',
+  centric: 'All 12 small rings run the same 0→1 path in parallel, so every small ring spins in sync.',
+  updown: 'Like centric, but small ring k is rotated by k pixels. Each small ring sits 30° further around the big ring, so this rotation can cancel that turn and give every small ring the same absolute direction (to be confirmed on hardware).',
+  arc: 'Each small ring goes 0→peak→0 from pixel 0 to pixel 6, so the motion is mirrored inside each small ring.',
+  ind: 'Each whole small ring gets one relPos (k/12), so the motion steps around the big ring one solid small ring at a time, starting from the one facing the installation center.',
+  b1: 'Every 3rd pixel, all at relPos 0. A static dotted pattern that flashes together.',
+  b2: 'The other 2 of every 3 pixels (the complement of b1).',
+  rand: 'Shuffled relPos, so a moving snake becomes random sparkle.',
+  '0': 'Only small ring 0, the one facing the installation center. Segments "0" to "11" each target one small ring.',
+  '5': 'Only small ring 5.',
+};
+const segNames = ['all', 'centric', 'updown', 'arc', 'ind', 'b1', 'b2', 'rand', '0', '5'];
+const seg = { name: 'centric' };
+chips(document.getElementById('segChips'), segNames.map(n => ({ id: n, label: n })), it => seg.name = it.id, 'centric');
+const cv = document.getElementById('seg'), ctx = cv.getContext('2d');
+
+const BIG_R = 262, SMALL_R = 58, PIX_R = 7.5;
+function pixelXY(i) {
+  const k = Math.floor(i / 12), j = i % 12;
+  const C = cv.width / 2;
+  const ak = (180 + k * 30) * Math.PI / 180;                       // small ring k; 0 at the bottom = facing the installation center
+  const sx = C + BIG_R * Math.sin(ak), sy = C - BIG_R * Math.cos(ak);
+  const aj = ak + Math.PI + j * Math.PI / 6;                       // pixel 0 faces the big ring's center (assumed), clockwise
+  return [sx + SMALL_R * Math.sin(aj), sy - SMALL_R * Math.cos(aj), sx, sy];
+}
+function drawSeg(now) {
+  const rel = SEGMENTS[seg.name];
+  const t = (now / (BEAT_MS * 4)) % 1;                             // one pass = 4 beats
+  const W = cv.width, C = W / 2;
+  ctx.fillStyle = css('--panel'); ctx.fillRect(0, 0, W, W);
+  ctx.fillStyle = css('--muted'); ctx.font = '22px -apple-system, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('↓ installation center', C, W - 8);
+  for (let k = 0; k < 12; k++) {
+    const [, , sx, sy] = pixelXY(k * 12);
+    ctx.fillText(String(k), C + (sx - C) * 0.62, C + (sy - C) * 0.62 + 8);
+  }
+  for (let i = 0; i < 144; i++) {
+    const [x, y] = pixelXY(i);
+    const rp = rel[i];
+    let fill;
+    if (rp === null) fill = css('--off');
+    else {
+      const d = ((t - rp) % 1 + 1) % 1;
+      const v = Math.max(0, 1 - d / 0.3);
+      fill = v > 0 ? `hsl(${190 + 140 * rp} 90% ${18 + 50 * v}%)` : `hsl(${190 + 140 * rp} 30% 18%)`;
+    }
+    ctx.fillStyle = fill;
+    ctx.beginPath(); ctx.arc(x, y, i % 12 === 0 ? PIX_R * 1.35 : PIX_R, 0, Math.PI * 2); ctx.fill();
+  }
+  document.getElementById('segInfo').innerHTML =
+    `<p><code>${seg.name}</code>: ${SEG_DESC[seg.name]}</p>
+     <p style="color:var(--muted);font-size:13px">One big ring = 12 small rings × 12 pixels (pixel index = small×12 + pos). Small ring 0 faces the center of the installation (bottom here). The numbers are small-ring indices. Larger dots are pixel 0 of each small ring. Hue shows each pixel's relPos. The bright band is a snake moving 0→1 every 4 beats.</p>
+     <p style="color:var(--muted);font-size:13px"><b>Assumed:</b> small rings numbered clockwise, and pixel 0 of each small ring on its side facing the big ring's center, also running clockwise.</p>`;
+}
+
+
+/* ---------- 2. Two-part layouts: big-ring split × inside split × combine ---------- */
+const relOf = name => i => SEGMENTS[name][i];
+const relArc = relOf('arc'), relRand = relOf('rand'), relUp = relOf('updown');
+const isB1 = i => SEGMENTS.b1[i] !== null;
+const INNER = [9, 10, 11, 0, 1, 2];                              // ind + outerQuarters mask
+
+// Big-ring splits: G1 = rings listed, G2 = the rest.
+const BIG = [
+  { id: 'none', label: 'None (all rings same)', G1: [1,2,3,4,5,6,7,8,9,10,11,12],
+    why: '' },
+  { id: 'lr', label: 'Left / right', G1: [12, 1, 2, 3, 4, 5], why: 'two halves facing each other' },
+  { id: 'tb', label: 'Top / bottom', G1: [9, 10, 11, 12, 1, 2], why: 'sky and ground' },
+  { id: 'third', label: 'Every third (X)', G1: [1, 4, 7, 10], why: '4 rings on the diagonals vs 8' },
+  { id: 'alt', label: 'Alternate', G1: [1, 3, 5, 7, 9, 11], why: 'neighbouring rings differ' },
+  { id: 'bowtie', label: 'Bowtie', G1: [10, 11, 12, 1, 4, 5, 6, 7], why: 'top + bottom vs the sides (2,3 and 8,9)' },
+];
+// Inside-ring splits: s0 / s1 = the two halves of each big ring, built from segments (+ masks).
+const INSIDE = [
+  { id: 'whole', label: 'Whole ring', s0: () => true, rec: ['all', '—'], cost: 1, why: '' },
+  { id: 'io', label: 'Inner / outer', s0: (k) => INNER.includes(k), rec: ['ind + outerQuarters (inner side)', 'ind + middleHalf (outer side)'], cost: 2, why: 'inner side facing the center vs outer side' },
+  { id: 'pin', label: 'Pinwheel', s0: (k) => k < 6, rec: ['ind + lowHalf', 'ind + highHalf'], cost: 2, why: 'the same half of every ring, rotational' },
+  { id: 'teeth', label: 'Gear teeth', s0: (k) => k % 2 === 0, rec: ['ind + everyOther', 'ind + inverted everyOther'], cost: 2, why: 'alternating small rings' },
+  { id: 'moons', label: 'Half moons', s0: (k, i) => relArc(i) < 0.5, rec: ['arc + lowHalf', 'arc + highHalf'], cost: 2, why: 'inner/outer half of every small ring' },
+  { id: 'dots', label: 'Dots (b1/b2)', s0: (k, i) => isB1(i), rec: ['b1', 'b2'], cost: 1, why: 'every 3rd pixel vs the rest' },
+  { id: 'stripes', label: 'Pixel stripes', s0: (k, i) => (i % 12) % 2 === 0, rec: ['centric + everyOther', 'centric + inverted'], cost: 2, why: 'every other pixel' },
+  { id: 'stars', label: 'Starfield', s0: (k, i) => relRand(i) < 0.5, rec: ['rand + lowHalf', 'rand + highHalf'], cost: 2, why: 'random half of the pixels' },
+  { id: 'sunlit', label: 'Sunlit side', s0: (k, i) => relUp(i) < 0.5, rec: ['updown + lowHalf', 'updown + highHalf'], cost: 2, why: 'same absolute side of every small ring (unconfirmed)' },
+];
+// How the two levels combine. Returns 'A' | 'B' | null from (inG1, inS0).
+const COMBINE = [
+  { id: 'swap', label: 'Swap', f: (g1, s0) => (g1 === s0) ? 'A' : 'B',
+    text: 'G1 rings: s0 = A, s1 = B. G2 rings: roles swapped.',
+    why: 'Every ring shows both parts, but the roles flip between the two ring groups. Alternating beats make the pattern flip or ripple across the groups.' },
+  { id: 'keep', label: 'One side each', f: (g1, s0) => g1 ? (s0 ? 'A' : null) : (s0 ? null : 'B'),
+    text: 'G1 rings show only s0 (A). G2 rings show only s1 (B). The rest is dark.',
+    why: 'Sparser and more sculpted: each ring group shows one side, so the shape comes from where the light is not.' },
+  { id: 'accent', label: 'Full + pattern', f: (g1, s0) => g1 ? 'A' : (s0 ? 'B' : null),
+    text: 'G1 rings fully lit (A). G2 rings show only s0 (B).',
+    why: 'Bold full rings as the accent over a structured, quieter base. Unequal, so give A the stronger color.' },
+  { id: 'only', label: 'Pattern on G1 only', f: (g1, s0) => g1 ? (s0 ? 'A' : 'B') : null,
+    text: 'G1 rings split into A/B. G2 rings dark.',
+    why: 'Focuses the pattern in one region (e.g. only the top, only the X) and leaves the rest of the space dark.' },
+];
+// Well-known combinations get a name.
+const NAMES = {
+  'alt|io|swap': 'Zigzag', 'lr|io|swap': 'Sway (shifted circle)', 'tb|io|swap': 'Vertical sway', 'alt|dots|swap': 'Checkerboard',
+  'alt|moons|swap': 'Moon zigzag', 'third|io|accent': 'Accent + inner glow', 'alt|pin|swap': 'Counter-pinwheel',
+  'third|teeth|swap': 'Crossed gears', 'lr|pin|swap': 'Yin-yang', 'tb|io|keep': 'Crown & roots', 'bowtie|stripes|swap': 'Woven bowtie',
+};
+// Special shapes that do not fit the grid.
+const RIGHT = [12, 1, 2, 3, 4, 5];
+const SPECIAL = [
+  { id: 'wings', label: 'Mirror wings',
+    f: (r, k) => RIGHT.includes(r) ? (k <= 5 ? 'A' : 'B') : ((k === 0 || k >= 7) ? 'A' : 'B'),
+    code: 'A = right rings ind+lowHalf, left rings "7".."11","0" · B = the rest',
+    why: 'Mirror-symmetric (a butterfly) instead of rotational. Calm and posed.',
+    costN: 6, cost: 'Right: 2 per ring. Left: 6 single-small-ring effects (no mask covers 7..11 + 0). Expensive.' },
+  { id: 'twist', label: 'Twist',
+    f: (r, k) => ((k - r + 24) % 12) < 6 ? 'A' : 'B',
+    code: 'Ring r: A = small rings r..r+5 (mod 12) · B = the other 6',
+    why: 'Each ring\'s half is rotated one small ring further than its neighbour, so it spirals around the installation.',
+    costN: 6, cost: 'Soft version: ind + sin mask with phase r/12 (2 per ring). Hard version: 6 single-small-ring effects per ring.' },
+  { id: 'crown', label: 'Crown + inner circle',
+    f: (r, k) => [9, 10, 11, 12, 1, 2].includes(r) && !INNER.includes(k) ? 'A' : k === 0 ? 'B' : null,
+    code: 'A = top rings ind + middleHalf (outer side) · B = segment "0" on all rings',
+    why: 'A quiet inner circle as the base with a bright crown on top. Hero moments, drops.',
+    costN: 2, cost: '2 per ring (A) + 1 per ring (B).' },
+];
+
+const segSt = { big: BIG[4], inside: INSIDE[1], comb: COMBINE[0], special: null, use: USES[1], split: null };
+function buildSplit() {
+  if (segSt.special) return segSt.special;
+  return buildCombo(segSt.big, segSt.inside, segSt.comb);
+}
+function buildCombo(big, inside, comb) {
+  const ringLevel = inside.id === 'whole', noBig = big.id === 'none';
+  const G2 = [1,2,3,4,5,6,7,8,9,10,11,12].filter(r => !big.G1.includes(r));
+  let f, code, why, cost, name;
+  if (ringLevel && noBig) {
+    f = () => 'A'; code = 'A = everything (no split)'; why = 'Pick a big-ring split or an inside split.'; cost = '1 per ring.';
+  } else if (ringLevel) {
+    f = (r) => big.G1.includes(r) ? 'A' : 'B';
+    code = `A = rings ${big.G1.join(',')} · B = rings ${G2.join(',')} (segment all)`;
+    why = `Whole-ring split: ${big.why}.`; cost = '1 per ring per layer.';
+  } else if (noBig) {
+    f = (r, k, i) => inside.s0(k, i) ? 'A' : 'B';
+    code = `A = ${inside.rec[0]} · B = ${inside.rec[1]} (all rings)`;
+    why = `Inside split on every ring: ${inside.why}.`; cost = `${inside.cost} per ring per part per layer.`;
+  } else {
+    f = (r, k, i) => comb.f(big.G1.includes(r), inside.s0(k, i));
+    code = `G1 = rings ${big.G1.join(',')} · G2 = rings ${G2.join(',')}<br>s0 = ${inside.rec[0]} · s1 = ${inside.rec[1]}<br>${comb.text}`;
+    why = `${comb.why} Big rings: ${big.why}. Inside: ${inside.why}.`;
+    cost = `${inside.cost} per ring per part per layer (the ring split itself is free: it only picks elements).`;
+    name = NAMES[`${big.id}|${inside.id}|${comb.id}`];
+  }
+  return { id: 'combo', f, code, why, cost, name };
+}
+const refresh = () => { segSt.split = buildSplit(); };
+const clearSpecial = () => { segSt.special = null; [...document.getElementById('specialChips').children].forEach(b => b.classList.remove('on')); };
+chips(document.getElementById('bigChips'), BIG, it => { segSt.big = it; clearSpecial(); refresh(); }, 'alt');
+chips(document.getElementById('insideChips'), INSIDE, it => { segSt.inside = it; clearSpecial(); refresh(); }, 'io');
+chips(document.getElementById('combChips'), COMBINE, it => { segSt.comb = it; clearSpecial(); refresh(); }, 'swap');
+chips(document.getElementById('specialChips'), SPECIAL, it => { segSt.special = it; refresh(); }, null);
+chips(document.getElementById('segUseChips'), USES, it => segSt.use = it, 'beats');
+refresh();
+
+const byId = (list, id) => list.find(x => x.id === id);
+const combo = (b, i, c, label) => Object.assign(buildCombo(byId(BIG, b), byId(INSIDE, i), byId(COMBINE, c || 'swap')), label ? { name: label, label } : {});
+const CLASSIC = [
+  ['Left / right', 'lr', 'whole'], ['Top / bottom', 'tb', 'whole'], ['Every third (X)', 'third', 'whole'], ['Alternate (odd/even)', 'alt', 'whole'],
+  ['Inner / outer', 'none', 'io'], ['Dots / fill (b1 / b2)', 'none', 'dots'], ['Pinwheel halves', 'none', 'pin'], ['Gear teeth', 'none', 'teeth'],
+  ['Half moons (arc)', 'none', 'moons'], ['Starfield (rand)', 'none', 'stars'], ['Pixel stripes (centric)', 'none', 'stripes'], ['Sunlit side (updown)', 'none', 'sunlit'],
+  ['Checkerboard', 'alt', 'dots', 'swap'], ['Accent + inner glow', 'third', 'io', 'accent'], ['Zigzag', 'alt', 'io', 'swap'],
+  ['Sway (shifted circle)', 'lr', 'io', 'swap'], ['Moon zigzag', 'alt', 'moons', 'swap'],
+].map(([label, b, i, c]) => Object.assign(combo(b, i, c, label), { id: 'classic-' + label }));
+const CLASSIC_ALL = [...CLASSIC, ...SPECIAL];
+chips(document.getElementById('classicChips'), CLASSIC_ALL, it => {
+  segSt.special = it; refresh();
+  document.querySelectorAll('#specialChips button').forEach(b => b.classList.remove('on'));
+}, null);
+
+
+/* ---------- Properties: computed from each option's pixel map ---------- */
+const ringAt = r => ((r - 1 + 120) % 12) + 1;
+function grid(sp) {
+  const P = {};
+  for (let r = 1; r <= 12; r++) { P[r] = []; for (let i = 0; i < 144; i++) { const v = sp.f(r, Math.floor(i / 12), i); P[r].push(v === undefined ? null : v); } }
+  return P;
+}
+function sameUpToPermutation(P, map) {             // map(r, i) -> [r2, i2]
+  const m = new Map(), inv = new Map();
+  for (let r = 1; r <= 12; r++) for (let i = 0; i < 144; i++) {
+    const a = P[r][i], [r2, i2] = map(r, i), b = P[r2][i2];
+    if ((a === null) !== (b === null)) return false;
+    if (m.has(a) ? m.get(a) !== b : false) return false;
+    if (inv.has(b) ? inv.get(b) !== a : false) return false;
+    m.set(a, b); inv.set(b, a);
+  }
+  return true;
+}
+function computeProps(sp) {
+  if (sp._props) return sp._props;
+  const P = grid(sp);
+  let lit = 0, pixPairs = 0, pixDiff = 0, srPairs = 0, srDiff = 0;
+  const counts = new Map(), srSigs = new Set(), ringSigs = new Set();
+  let insideVaries = false;
+  for (let r = 1; r <= 12; r++) {
+    ringSigs.add(P[r].join(','));
+    if (new Set(P[r]).size > 1) insideVaries = true;
+    for (let k = 0; k < 12; k++) {
+      const sig = P[r].slice(k * 12, k * 12 + 12).join(','), next = P[r].slice(((k + 1) % 12) * 12, ((k + 1) % 12) * 12 + 12).join(',');
+      srSigs.add(sig); srPairs++; if (sig !== next) srDiff++;
+      for (let j = 0; j < 12; j++) {
+        const a = P[r][k * 12 + j], b = P[r][k * 12 + (j + 1) % 12];
+        pixPairs++; if (a !== b) pixDiff++;
+        if (a !== null) { lit++; counts.set(a, (counts.get(a) || 0) + 1); }
+      }
+    }
+  }
+  const coverage = lit / 1728, pixelChange = pixDiff / pixPairs, srChange = srDiff / srPairs;
+  const parts = [...counts.values()], nParts = parts.length;
+  const balance = nParts > 1 ? Math.min(...parts) / Math.max(...parts) : 1;
+  const grain = pixelChange > 0.55 ? 3 : (pixelChange > 0.1 || srChange > 0.34) ? 2 : srChange > 0 ? 1 : 0;
+  // Scattered = small rings inside one big ring have many different patterns, even ignoring rotation (e.g. rand).
+  let maxShapes = 0;
+  for (let r = 1; r <= 12; r++) {
+    const shapes = new Set();
+    for (let k = 0; k < 12; k++) {
+      const px = P[r].slice(k * 12, k * 12 + 12);
+      let best = null;
+      for (let o = 0; o < 12; o++) { const rot = px.slice(o).concat(px.slice(0, o)).join(','); if (best === null || rot < best) best = rot; }
+      shapes.add(best);
+    }
+    maxShapes = Math.max(maxShapes, shapes.size);
+  }
+  const scattered = maxShapes > 4;
+  let rotOrder = 1;
+  for (const n of [1, 2, 3, 4, 6]) if (sameUpToPermutation(P, (r, i) => [ringAt(r + n), i])) { rotOrder = 12 / n; break; }
+  const mirror = sameUpToPermutation(P, (r, i) => {
+    const k = Math.floor(i / 12), j = i % 12;
+    return [((22 - r) % 12) + 1, ((12 - k) % 12) * 12 + (12 - j) % 12];
+  });
+  const levels = (ringSigs.size > 1 ? 1 : 0) + (insideVaries ? 1 : 0);
+  const score = levels + (grain >= 2 ? 1 : 0) + (ringSigs.size >= 3 ? 1 : 0) + (scattered ? 1 : 0);
+  const costN = sp.costN ?? (parseInt(sp.cost) || 1);
+  const tags = [];
+  const T = (group, label, title, extra) => tags.push({ group, label, title, extra: extra || '' });
+  T('coverage', coverage > 0.999 ? 'Full' : 'Partial', `${Math.round(coverage * 100)}% of pixels lit`, coverage > 0.999 ? '' : ` ${Math.round(coverage * 100)}%`);
+  if (nParts > 1) T('balance', balance > 0.8 ? 'Even' : 'Uneven', `smallest part is ${Math.round(balance * 100)}% of the largest`);
+  T('grain', ['Whole rings', 'Large shapes', 'Small-ring pattern', 'Fine texture'][grain],
+    ['bold, reads from anywhere', 'big shapes inside the rings, reads from far', 'pattern at small-ring scale, reads at mid distance', 'pixel-level texture, reads up close'][grain]);
+  T('order', scattered ? 'Scattered' : 'Organized', scattered ? 'irregular, random-looking placement' : 'regular, repeating structure');
+  if (mirror) T('symmetry', 'Mirror', 'mirror-symmetric across the vertical axis (parts may swap)');
+  if (rotOrder > 1) T('symmetry', `Rotational`, `looks the same after rotating by ${12 / rotOrder} ring(s) (parts may swap)`, ` ×${rotOrder}`);
+  if (!mirror && rotOrder === 1) T('symmetry', 'Asymmetric', 'no mirror or rotational symmetry');
+  T('feel', scattered ? 'Sparkly' : mirror ? 'Calm' : rotOrder > 1 ? 'Dynamic' : 'Directional',
+    scattered ? 'glittery, restless' : mirror ? 'balanced, posed' : rotOrder > 1 ? 'suggests spinning or flow' : 'points somewhere, one-sided');
+  T('complexity', score <= 1 ? 'Simple' : score === 2 ? 'Moderate' : 'Intricate',
+    score <= 1 ? 'one clear idea; bold but can get boring if held long' : score === 2 ? 'some structure to look at' : 'lots to look at; can get busy if overused');
+  T('cost', costN >= 5 ? 'Expensive' : `Cost ${costN}`, `${costN} effect(s) per ring per part per layer`);
+  sp._props = { tags };
+  return sp._props;
+}
+const TAG_COLORS = { coverage: 200, balance: 30, grain: 260, order: 330, symmetry: 160, feel: 45, complexity: 0, cost: 220 };
+const tagHtml = (sp, compact) => computeProps(sp).tags.map(t =>
+  `<span class="tag" data-g="${t.group}" title="${t.group}: ${t.title}" style="--th:${TAG_COLORS[t.group]}">${t.label}${compact ? '' : t.extra}</span>`).join('');
+
+// Tag filter bar for a gallery: shows only cards that have all selected tags.
+function filterBar(container, cards) {
+  const sel = new Set(), bar = document.createElement('div'); bar.className = 'filters';
+  const groups = new Map();
+  cards.forEach(c => c._tags.forEach(t => { if (!groups.has(t.group)) groups.set(t.group, new Set()); groups.get(t.group).add(t.label); }));
+  bar.innerHTML = '<div class="label" style="margin:0 0 6px">Filter by property</div>';
+  for (const [g, labels] of groups) for (const l of labels) {
+    const b = document.createElement('button'); b.className = 'tag tagbtn'; b.style.setProperty('--th', TAG_COLORS[g]); b.textContent = l; b.title = g;
+    b.onclick = () => { const key = g + ':' + l; sel.has(key) ? sel.delete(key) : sel.add(key); b.classList.toggle('on');
+      cards.forEach(c => { c.style.display = [...sel].every(k => c._tags.some(t => t.group + ':' + t.label === k)) ? '' : 'none'; });
+      container.querySelectorAll('.gallery').forEach(gr => { const lbl = gr.previousElementSibling; if (lbl) lbl.style.display = [...gr.children].some(c => c.style.display !== 'none') ? '' : 'none'; }); };
+    bar.appendChild(b);
+  }
+  container.prepend(bar);
+}
+
+/* ---------- 4. Gallery ---------- */
+const NAMED = Object.entries(NAMES).map(([key, name]) => { const [b, i, c] = key.split('|'); return combo(b, i, c, name); });
+const ALL_COMBOS = [];
+for (const b of BIG) for (const i of INSIDE) {
+  if (b.id === 'none' && i.id === 'whole') continue;
+  const combs = (b.id === 'none' || i.id === 'whole') ? [COMBINE[0]] : COMBINE;
+  for (const c of combs) {
+    const sp = buildCombo(b, i, c);
+    sp.caption = b.id === 'none' ? i.label : i.id === 'whole' ? b.label : `${b.label} × ${i.label} × ${c.label}`;
+    sp.group = b.label;
+    ALL_COMBOS.push(sp);
+  }
+}
+function drawThumb(cv, split) {
+  const g = cv.getContext('2d'), W = cv.width, k = W / fcv.width;
+  g.fillStyle = css('--panel'); g.fillRect(0, 0, W, W);
+  const cA = hsl(HA), cB = hsl(HB), cOff = css('--off');
+  for (let r = 1; r <= 12; r++) for (let i = 0; i < 144; i++) {
+    const part = split.f(r, Math.floor(i / 12), i);
+    const [x, y] = fullPixelXY(r, i);
+    g.fillStyle = part === 'A' ? cA : part === 'B' ? cB : cOff;
+    g.fillRect(x * k - 1, y * k - 1, 2.2, 2.2);
+  }
+}
+function galleryGroup(title, note, items, captionOf) {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div class="label" style="margin-top:22px">${title} <span style="text-transform:none;letter-spacing:0">(${items.length})</span></div>` + (note ? `<p class="desc">${note}</p>` : '');
+  const grid = document.createElement('div'); grid.className = 'gallery';
+  items.forEach(sp => {
+    const card = document.createElement('button'); card.className = 'thumb';
+    const cv = document.createElement('canvas'); cv.width = 220; cv.height = 220;
+    const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = captionOf(sp);
+    const tg = document.createElement('div'); tg.className = 'tags'; tg.innerHTML = tagHtml(sp, true);
+    card._tags = computeProps(sp).tags; ALL_CARDS.push(card);
+    card.appendChild(cv); card.appendChild(cap); card.appendChild(tg);
+    card.onclick = () => {
+      segSt.special = sp; refresh();
+      document.getElementById('panel2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    grid.appendChild(card);
+    requestIdleCallback ? requestIdleCallback(() => drawThumb(cv, sp)) : setTimeout(() => drawThumb(cv, sp));
+  });
+  wrap.appendChild(grid);
+  document.getElementById('gallery').appendChild(wrap);
+}
+window.requestIdleCallback = window.requestIdleCallback || (f => setTimeout(f, 0));
+const ALL_CARDS = [];
+galleryGroup('Classic options', '', CLASSIC, sp => sp.label);
+galleryGroup('Named combinations', '', NAMED, sp => sp.name);
+galleryGroup('Special shapes', '', SPECIAL, sp => sp.label);
+for (const b of BIG) galleryGroup(`All combinations · big split: ${b.label}`, '', ALL_COMBOS.filter(sp => sp.group === b.label),
+  sp => (sp.name ? sp.name + ' · ' : '') + sp.caption);
+filterBar(document.getElementById('gallery'), ALL_CARDS);
+const fcv = document.getElementById('full'), fctx = fcv.getContext('2d');
+const FULL = { R: 400, big: 72, small: 14.5, pix: 2.8 };   // big-ring width ≈ 179px < center spacing ≈ 209px
+function fullPixelXY(r, i) {
+  const C = fcv.width / 2, k = Math.floor(i / 12), j = i % 12;
+  const ar = (r + 0.5) * Math.PI / 6;
+  const bx = C + FULL.R * Math.sin(ar), by = C - FULL.R * Math.cos(ar);
+  const ak = ar + Math.PI + k * Math.PI / 6;                        // small ring 0 faces the installation center
+  const sx = bx + FULL.big * Math.sin(ak), sy = by - FULL.big * Math.cos(ak);
+  const aj = ak + Math.PI + j * Math.PI / 6;                       // pixel 0 faces the big ring's center (assumed)
+  return [sx + FULL.small * Math.sin(aj), sy - FULL.small * Math.cos(aj)];
+}
+function drawFull(now) {
+  const beat = now / BEAT_MS, bi = Math.floor(beat), fade = 1 - (beat - bi);
+  fctx.fillStyle = css('--panel'); fctx.fillRect(0, 0, fcv.width, fcv.height);
+  fctx.fillStyle = css('--muted'); fctx.font = '26px -apple-system, sans-serif'; fctx.textAlign = 'center';
+  for (let r = 1; r <= 12; r++) {
+    const a = (r + 0.5) * Math.PI / 6, C = fcv.width / 2;
+    fctx.fillText(String(r), C + (FULL.R - 130) * Math.sin(a), C - (FULL.R - 130) * Math.cos(a) + 9);
+    for (let i = 0; i < 144; i++) {
+      const part = segSt.split.f(r, Math.floor(i / 12), i);
+      let fill = css('--off');
+      if (part) {
+        const inA = part === 'A';
+        let v;
+        if (segSt.use.id === 'colors') v = 0.75 + 0.25 * fade;
+        else if (segSt.use.id === 'beats') v = (bi % 2 === (inA ? 0 : 1)) ? fade : 0;
+        else v = (Math.floor(bi / 4) % 2 === (inA ? 0 : 1)) ? fade : 0.08;
+        if (v > 0.02) fill = hsl(inA ? HA : HB, 20 + 45 * v, 85);
+      }
+      const [x, y] = fullPixelXY(r, i);
+      fctx.fillStyle = fill; fctx.beginPath(); fctx.arc(x, y, FULL.pix, 0, Math.PI * 2); fctx.fill();
+    }
+  }
+  document.getElementById('segSplitInfo').innerHTML =
+    `<div class="legend"><span><i style="background:${hsl(HA)}"></i>A</span><span><i style="background:${hsl(HB)}"></i>B</span>${(segSt.split.name || segSt.split.label) ? `<span><b>= ${segSt.split.name || segSt.split.label}</b></span>` : ''}</div>
+     <div class="tags big">${tagHtml(segSt.split, false)}</div><p><code style="white-space:normal">${segSt.split.code}</code></p><p>${segSt.split.why}</p><p style="color:var(--muted);font-size:13px"><b>Cost:</b> ${segSt.split.cost}</p>`;
+}
+
+
+/* ---------- 5. Four-part layouts ---------- */
+const H4 = [215, 25, 140, 300], P4 = ['A', 'B', 'C', 'D'];
+const TOP = [9, 10, 11, 12, 1, 2];
+const QUADS = [[12, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]];
+const BIG4 = [
+  { id: 'none', label: 'None (all rings same)', g: () => 0, groups: '', why: '' },
+  { id: 'quad', label: 'Quadrants', g: r => QUADS.findIndex(q => q.includes(r)), groups: '12,1,2 | 3,4,5 | 6,7,8 | 9,10,11',
+    why: 'four sides of the circle (top-right, bottom-right, bottom-left, top-left)' },
+  { id: 'tri', label: 'Triangles (every 4th)', g: r => (r - 1) % 4, groups: '1,5,9 | 2,6,10 | 3,7,11 | 4,8,12',
+    why: 'each group is a triangle spread around the circle; stepping through them spins a triangle' },
+  { id: 'altlr', label: 'Alternate × left/right', g: r => (RIGHT.includes(r) ? 0 : 2) + (r % 2 ? 0 : 1), groups: 'right odd | right even | left odd | left even',
+    why: 'alternation inside each half: two conversations at once' },
+  { id: 'alttb', label: 'Alternate × top/bottom', g: r => (TOP.includes(r) ? 0 : 2) + (r % 2 ? 0 : 1), groups: 'top odd | top even | bottom odd | bottom even',
+    why: 'alternation inside the top and the bottom halves' },
+];
+const q4 = x => Math.min(3, Math.floor(x * 4));
+const INSIDE4 = [
+  { id: 'whole', label: 'Whole ring', q: () => 0, rec: 'all', cost: 1, why: '' },
+  { id: 'qpin', label: 'Quarter pinwheel', q: k => Math.floor(k / 3), rec: 'ind + quarter masks (small rings 0-2 | 3-5 | 6-8 | 9-11)', cost: 2,
+    why: 'each big ring cut into four quarters, the same way on every ring' },
+  { id: 'bands', label: 'Bands (arc)', q: (k, i) => q4(relArc(i)), rec: 'arc + quarter masks', cost: 2,
+    why: 'every small ring split into bands from its inner-facing side to its outer tip (uneven: 3/4/4/1 pixels)' },
+  { id: 'qsmall', label: 'Quartered small rings', q: (k, i) => Math.floor((i % 12) / 3), rec: 'centric + quarter masks (pixels 0-2 | 3-5 | 6-8 | 9-11)', cost: 2,
+    why: 'every small ring cut into four quarters' },
+  { id: 'stars4', label: '4-color starfield', q: (k, i) => q4(relRand(i)), rec: 'rand + quarter masks', cost: 2,
+    why: 'four random, even quarters of all pixels' },
+  { id: 'compass', label: 'Compass (updown)', q: (k, i) => q4(relUp(i)), rec: 'updown + quarter masks', cost: 2,
+    why: 'every small ring quartered by absolute direction (unconfirmed)' },
+];
+const COMBINE4 = [
+  { id: 'rotate', label: 'Rotate', f: (g, q) => (g + q) % 4, text: 'part = (group + quarter) mod 4',
+    why: 'Every ring group shows all four parts, shifted by one step per group. Running A→B→C→D makes the whole pattern turn.' },
+  { id: 'counter', label: 'Counter-rotate', f: (g, q) => (q - g + 4) % 4, text: 'part = (quarter − group) mod 4',
+    why: 'Like rotate, but the shift runs the other way, so neighbouring groups seem to turn against each other.' },
+];
+function build4(big, inside, comb) {
+  const noBig = big.id === 'none', whole = inside.id === 'whole';
+  if (noBig && whole) return { f: () => 0, code: 'Pick a big split or an inside split.', why: '', cost: '1 per ring.' };
+  if (whole) return { f: r => big.g(r), code: `A | B | C | D = rings ${big.groups} (segment all)`, why: `Whole-ring 4-way split: ${big.why}.`,
+    cost: '1 per ring per layer.', caption: big.label };
+  if (noBig) return { f: (r, k, i) => inside.q(k, i), code: `A–D = ${inside.rec} (all rings)`, why: `4-way inside split: ${inside.why}.`,
+    cost: `${inside.cost} per ring per part per layer.`, caption: inside.label };
+  return { f: (r, k, i) => comb.f(big.g(r), inside.q(k, i)),
+    code: `Groups: ${big.groups}<br>Quarters: ${inside.rec}<br>${comb.text}`,
+    why: `${comb.why} Big rings: ${big.why}. Inside: ${inside.why}.`,
+    cost: `${inside.cost} per ring per part per layer.`, caption: `${big.label} × ${inside.label} × ${comb.label}` };
+}
+function buildCross(big, inside) {
+  const G2 = [1,2,3,4,5,6,7,8,9,10,11,12].filter(r => !big.G1.includes(r));
+  return { f: (r, k, i) => (big.G1.includes(r) ? 0 : 2) + (inside.s0(k, i) ? 0 : 1),
+    code: `A = G1·s0 · B = G1·s1 · C = G2·s0 · D = G2·s1<br>G1 = rings ${big.G1.join(',')} · G2 = ${G2.join(',')}<br>s0 = ${inside.rec[0]} · s1 = ${inside.rec[1]}`,
+    why: `2×2 cross. Big: ${big.why}. Inside: ${inside.why}. A/B and C/D are the same shape on the two ring groups, so pairs (A+C vs B+D) read as the inside split and (A+B vs C+D) as the big split.`,
+    cost: `${inside.cost} per ring per part per layer.`, caption: `${big.label} ⊗ ${inside.label}` };
+}
+const USES4 = [
+  { id: 'colors', label: 'Four colors' },
+  { id: 'robin', label: 'Round robin (1 beat each)' },
+  { id: 'pairs', label: 'Pairs (A+C / B+D)' },
+  { id: 'build', label: 'Build-up (4 beats)' },
+];
+const st4 = { mode: 'four', big: BIG4[2], inside: INSIDE4[1], comb: COMBINE4[0], cbig: BIG[1], cins: INSIDE[1], use: USES4[1], split: null, pinned: null };
+const refresh4 = () => { st4.split = st4.pinned || (st4.mode === 'four' ? build4(st4.big, st4.inside, st4.comb) : buildCross(st4.cbig, st4.cins)); };
+const clearRows = ids => ids.forEach(id => [...document.getElementById(id).children].forEach(b => b.classList.remove('on')));
+const pick4 = (key, mode) => it => {
+  st4[key] = it; st4.mode = mode; st4.pinned = null;
+  clearRows(mode === 'four' ? ['crossBigChips', 'crossInsideChips'] : ['big4Chips', 'inside4Chips', 'comb4Chips']);
+  refresh4();
+};
+chips(document.getElementById('big4Chips'), BIG4, pick4('big', 'four'), 'tri');
+chips(document.getElementById('inside4Chips'), INSIDE4, pick4('inside', 'four'), 'qpin');
+chips(document.getElementById('comb4Chips'), COMBINE4, pick4('comb', 'four'), 'rotate');
+chips(document.getElementById('crossBigChips'), BIG.filter(b => b.id !== 'none'), pick4('cbig', 'cross'), null);
+chips(document.getElementById('crossInsideChips'), INSIDE.filter(i => i.id !== 'whole'), pick4('cins', 'cross'), null);
+chips(document.getElementById('use4Chips'), USES4, it => st4.use = it, 'robin');
+refresh4();
+
+const fcv4 = document.getElementById('full4'), fctx4 = fcv4.getContext('2d');
+function level4(part, now) {
+  const beat = now / BEAT_MS, bi = Math.floor(beat), fade = 1 - (beat - bi);
+  switch (st4.use.id) {
+    case 'colors': return 0.75 + 0.25 * fade;
+    case 'robin': return bi % 4 === part ? fade : 0.06;
+    case 'pairs': return (bi % 2) === (part % 2) ? fade : 0.06;
+    default: { const step = bi % 4; return part <= step ? (part === step ? 0.6 + 0.4 * fade : 0.7) : 0.04; }
+  }
+}
+function drawFull4(now) {
+  fctx4.fillStyle = css('--panel'); fctx4.fillRect(0, 0, fcv4.width, fcv4.height);
+  fctx4.fillStyle = css('--muted'); fctx4.font = '26px -apple-system, sans-serif'; fctx4.textAlign = 'center';
+  const C = fcv4.width / 2;
+  for (let r = 1; r <= 12; r++) {
+    const a = (r + 0.5) * Math.PI / 6;
+    fctx4.fillText(String(r), C + (FULL.R - 130) * Math.sin(a), C - (FULL.R - 130) * Math.cos(a) + 9);
+    for (let i = 0; i < 144; i++) {
+      const part = st4.split.f(r, Math.floor(i / 12), i);
+      let fill = css('--off');
+      if (part !== null && part !== undefined) {
+        const v = level4(part, now);
+        if (v > 0.02) fill = hsl(H4[part], 20 + 45 * v, 85);
+      }
+      const [x, y] = fullPixelXY(r, i);
+      fctx4.fillStyle = fill; fctx4.beginPath(); fctx4.arc(x, y, FULL.pix, 0, Math.PI * 2); fctx4.fill();
+    }
+  }
+  document.getElementById('info4').innerHTML =
+    `<div class="legend">${P4.map((p, n) => `<span><i style="background:${hsl(H4[n])}"></i>${p}</span>`).join('')}${st4.split.caption ? `<span><b>= ${st4.split.caption}</b></span>` : ''}</div>
+     <div class="tags big">${tagHtml(st4.split, false)}</div><p><code style="white-space:normal">${st4.split.code}</code></p><p>${st4.split.why}</p>
+     <p style="color:var(--muted);font-size:13px"><b>Cost:</b> ${st4.split.cost} Tip: four colors can come from one color layer plus one <code>position_hue</code> with <code>steps</code> (4 steps, 0.25 per step), so 2 effects per ring instead of 8.</p>`;
+}
+
+// gallery for four parts
+function drawThumb4(cv, split) {
+  const g = cv.getContext('2d'), W = cv.width, k = W / fcv4.width;
+  g.fillStyle = css('--panel'); g.fillRect(0, 0, W, W);
+  const cols = H4.map(h => hsl(h)), cOff = css('--off');
+  for (let r = 1; r <= 12; r++) for (let i = 0; i < 144; i++) {
+    const part = split.f(r, Math.floor(i / 12), i);
+    const [x, y] = fullPixelXY(r, i);
+    g.fillStyle = (part === null || part === undefined) ? cOff : cols[part];
+    g.fillRect(x * k - 1, y * k - 1, 2.2, 2.2);
+  }
+}
+function gallery4Group(title, items) {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div class="label" style="margin-top:22px">${title} <span style="text-transform:none;letter-spacing:0">(${items.length})</span></div>`;
+  const grid = document.createElement('div'); grid.className = 'gallery';
+  items.forEach(sp => {
+    const card = document.createElement('button'); card.className = 'thumb';
+    const cv = document.createElement('canvas'); cv.width = 220; cv.height = 220;
+    const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = sp.caption;
+    const tg = document.createElement('div'); tg.className = 'tags'; tg.innerHTML = tagHtml(sp, true);
+    card._tags = computeProps(sp).tags; ALL_CARDS4.push(card);
+    card.appendChild(cv); card.appendChild(cap); card.appendChild(tg);
+    card.onclick = () => {
+      st4.pinned = sp; refresh4();
+      clearRows(['big4Chips', 'inside4Chips', 'comb4Chips', 'crossBigChips', 'crossInsideChips']);
+      document.getElementById('panel5').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    grid.appendChild(card);
+    requestIdleCallback(() => drawThumb4(cv, sp));
+  });
+  wrap.appendChild(grid);
+  document.getElementById('gallery4').appendChild(wrap);
+}
+const ALL_CARDS4 = [];
+const FOUR_SINGLE = [
+  ...BIG4.filter(b => b.id !== 'none').map(b => build4(b, INSIDE4[0], COMBINE4[0])),
+  ...INSIDE4.filter(i => i.id !== 'whole').map(i => build4(BIG4[0], i, COMBINE4[0])),
+];
+const FOUR_COMBOS = [];
+for (const b of BIG4.filter(b => b.id !== 'none')) for (const i of INSIDE4.filter(i => i.id !== 'whole')) for (const c of COMBINE4) FOUR_COMBOS.push(build4(b, i, c));
+const CROSSES = [];
+for (const b of BIG.filter(b => b.id !== 'none')) for (const i of INSIDE.filter(i => i.id !== 'whole')) CROSSES.push(buildCross(b, i));
+gallery4Group('Four parts · single level', FOUR_SINGLE);
+gallery4Group('Four parts · 4-way big × 4-way inside', FOUR_COMBOS);
+gallery4Group('Four parts · 2×2 cross (two-way big ⊗ two-way inside)', CROSSES);
+filterBar(document.getElementById('gallery4'), ALL_CARDS4);
+
+
+/* ---------- 6. Motion for two-part layouts ---------- */
+// FloatFunction evaluation + snake mask, matching ui/src/effectPreview.ts (which mirrors the firmware).
+function evalF(t, f) {
+  if (f.const_value) return f.const_value.value;
+  if (f.linear) return f.linear.start + t * (f.linear.end - f.linear.start);
+  if (f.sin) { const { min, max, phase, repeats } = f.sin; return min + (max - min) * 0.5 * (1 + Math.sin(2 * Math.PI * (repeats * t + phase))); }
+  if (f.steps) { const { num_steps, diff_per_step, first_step_value } = f.steps; return first_step_value + Math.min(Math.floor(t * num_steps), num_steps - 1) * diff_per_step; }
+  if (f.half) return t < 0.5 ? evalF(t * 2, f.half.f1) : evalF((t - 0.5) * 2, f.half.f2);
+  if (f.comb2) { const { f1, f2, amount1: a1, amount2: a2 } = f.comb2; return (a1 * evalF(t, f1) + a2 * evalF(t, f2)) / (a1 + a2); }
+  return 0;
+}
+function snakeMask(rel, head, tail, cyclic) {
+  if (tail < 1e-6) return 0;
+  if (cyclic) { let d = (head - rel + 1) % 1; if (d < 0) d += 1; return d <= tail ? 1 - d / tail : 0; }
+  const ct = head - tail; return (rel > head || rel < ct) ? 0 : (rel - ct) / tail;
+}
+const perElementPhase = (i, n, x) => x >= 0 ? i / n * x : (n - 1 - i) / n * -x;
+const L = (a, b) => ({ linear: { start: a, end: b } }), K = v => ({ const_value: { value: v } });
+const S = (min, max, phase, repeats = 1) => ({ sin: { min, max, phase, repeats } });
+const r3 = x => Math.round(x * 1000) / 1000;
+const fmt = o => JSON.stringify(o).replace(/"(\w+)":/g, '$1: ').replace(/,/g, ', ').replace(/\{/g, '{ ').replace(/\}/g, ' }').replace(/"__P(\+?-?[\d.]*)__"/g, (m, x) => 'p' + (x ? ` ${x[0] === '-' ? '-' : '+'} ${x.replace(/^[+-]/, '')}` : ''));
+const PV = x => (x === 0 ? '__P__' : `__P${x > 0 ? '+' : ''}${r3(x)}__`);   // symbolic "p + x" for code output
+// Each motion: sim(p, rev, tail) -> { head, tail, cyclic } with numeric p; code(rev, tail) -> TS for one ring group.
+const raw = (head, tail, cyclic) => `addEffect((p: number) => ({ snake: { head: ${fmt(head)}, tail_length: ${fmt(tail)}, cyclic: ${cyclic} } }))`;
+const MOTIONS = [
+  { id: 'static', label: 'Static', why: 'no motion, solid',
+    sim: () => null, code: () => null },
+  { id: 'chase', label: 'Chase', why: 'a snake travels the path and wraps around (linear head)',
+    sim: (p, rev, T) => ({ head: rev ? L(1 + p, p) : L(p, 1 + p), tail: K(T), cyclic: true }),
+    code: (rev, T) => `snake({ tailLength: ${T}, cyclic: true${rev ? ', reverse: true' : ''} })` },
+  { id: 'tick4', label: 'Tick ×4', why: 'the head jumps in 4 steps per cycle (steps function), like a clock',
+    sim: (p, rev, T) => ({ head: { steps: { num_steps: 4, diff_per_step: rev ? -0.25 : 0.25, first_step_value: rev ? 1 + p : p } }, tail: K(T), cyclic: true }),
+    code: (rev, T) => rev ? raw({ steps: { num_steps: 4, diff_per_step: -0.25, first_step_value: PV(1) } }, K(T), true) : `snakeHeadSteps({ steps: 4, tailLength: ${T} })` },
+  { id: 'tick12', label: 'Tick ×12', why: '12 steps per cycle; on ind the head jumps one small ring per step',
+    sim: (p, rev, T) => ({ head: { steps: { num_steps: 12, diff_per_step: rev ? -1 / 12 : 1 / 12, first_step_value: rev ? 1 + p : p } }, tail: K(T), cyclic: true }),
+    code: (rev, T) => rev ? raw({ steps: { num_steps: 12, diff_per_step: -r3(1 / 12), first_step_value: PV(1) } }, K(T), true) : `snakeHeadSteps({ steps: 12, tailLength: ${T} })` },
+  { id: 'surge', label: 'Surge', why: 'slow-fast rotation: average of a sin and a linear head (comb2)',
+    sim: (p, rev, T) => ({ head: { comb2: { f1: rev ? S(1, 0, p) : S(0, 1, p), amount1: 1, f2: rev ? L(1, 0) : L(0, 1), amount2: 1 } }, tail: K(T), cyclic: true }),
+    code: (rev, T) => rev ? raw({ comb2: { f1: { sin: { min: 1, max: 0, phase: PV(0), repeats: 1 } }, amount1: 1, f2: L(1, 0), amount2: 1 } }, K(T), true) : `snakeSlowFast({ tailLength: ${T} })` },
+  { id: 'breathe', label: 'Breathe', why: 'the head swings out and back (sin head, not cyclic), so the light grows and recedes',
+    sim: (p, rev, T) => ({ head: S(0, 1, p + (rev ? 0.5 : 0)), tail: K(T), cyclic: false }),
+    code: (rev, T) => (!rev && T === 0.5) ? 'snakeInOut()' : raw({ sin: { min: 0, max: 1, phase: PV(rev ? 0.5 : 0), repeats: 1 } }, K(T), false) },
+  { id: 'bounce', label: 'Ping-pong', why: 'the head runs forward then back (half: linear up, linear down)',
+    sim: (p, rev, T) => ({ head: { half: rev ? { f1: L(1 + p, p), f2: L(p, 1 + p) } : { f1: L(p, 1 + p), f2: L(1 + p, p) } }, tail: K(T), cyclic: true }),
+    code: (rev, T) => raw({ half: rev ? { f1: { linear: { start: PV(1), end: PV(0) } }, f2: { linear: { start: PV(0), end: PV(1) } } } : { f1: { linear: { start: PV(0), end: PV(1) } }, f2: { linear: { start: PV(1), end: PV(0) } } } }, K(T), true) },
+  { id: 'heartbeat', label: 'Heartbeat', why: 'sin head with a tail that grows and shrinks (half: linear 0.5→1→0.5)',
+    sim: (p, rev, T) => ({ head: S(0, 1, p + (rev ? 0.5 : 0)), tail: { half: { f1: L(0.5, 1), f2: L(1, 0.5) } }, cyclic: true }),
+    code: (rev) => rev ? raw({ sin: { min: 0, max: 1, phase: PV(0.5), repeats: 1 } }, { half: { f1: L(0.5, 1), f2: L(1, 0.5) } }, true) : 'snakeTailShrinkGrow()' },
+  { id: 'fill', label: 'Fill / drain', why: 'a very long, non-cyclic tail, so the path fills up (or drains in reverse)',
+    sim: (p, rev, T) => ({ head: rev ? L(1 + p, p) : L(p, 1 + p), tail: K(3), cyclic: false }),
+    code: (rev) => raw({ linear: rev ? { start: PV(1), end: PV(0) } : { start: PV(0), end: PV(1) } }, K(3), false) },
+];
+const PATHS = [
+  { id: 'all', label: 'all', why: 'one long path through every small ring' },
+  { id: 'centric', label: 'centric', why: 'every small ring spins in sync' },
+  { id: 'ind', label: 'ind', why: 'steps from small ring to small ring' },
+  { id: 'arc', label: 'arc', why: 'mirrored inside each small ring: two heads meet at the outer tip' },
+  { id: 'updown', label: 'updown', why: 'same absolute direction in every small ring (unconfirmed)' },
+  { id: 'rand', label: 'rand', why: 'random order: motion turns into twinkling' },
+];
+const TAILS = [0.1, 0.25, 0.4, 0.6, 0.85].map(v => ({ id: v, label: String(v) }));
+const SPEEDS = [1, 2, 3, 4, 8, 12].map(v => ({ id: v, label: v + (v === 1 ? ' beat' : ' beats') }));
+const WAVES = [
+  { id: 0, label: 'Unison' }, { id: 0.25, label: 'Slight' }, { id: 0.5, label: 'Half' }, { id: 1, label: 'Full wave' }, { id: -1, label: 'Reversed wave' }, { id: -0.5, label: 'Rev. half' },
+];
+const LEVELS = [{ id: 1, label: '100%' }, { id: 0.5, label: '50%' }, { id: 0.2, label: '20%' }];
+const HUES = [215, 25, 140, 300, 48, 185, 350, 265].map(h => ({ id: h, label: '' }));
+const DIRS = [{ id: false, label: 'Forward' }, { id: true, label: 'Reverse' }];
+
+const g = (path, motion, rev, tail, speed, wave, hue, level = 1) => ({ path, motion, rev, tail, speed, wave, hue, level });
+const M_PRESETS = [
+  { label: 'Counter-rotation', layout: ['big', 'alt'], A: g('all', 'chase', false, 0.4, 4, 1, 215), B: g('all', 'chase', true, 0.4, 4, 1, 25),
+    why: 'Interleaved rings spiral in opposite directions. The eye sees two wheels turning through each other. Energetic but ordered.' },
+  { label: 'Mirror chase', layout: ['big', 'lr'], A: g('centric', 'chase', false, 0.4, 2, 1, 185), B: g('centric', 'chase', true, 0.4, 2, -1, 300),
+    why: 'Right and left halves are exact mirror images: reverse direction plus a reversed wave. Calm, posed symmetry with lots of motion.' },
+  { label: 'Twin galaxies', layout: ['big', 'tb'], A: g('all', 'chase', false, 0.6, 8, 1, 265), B: g('all', 'chase', true, 0.6, 8, 1, 185),
+    why: 'Long tails crawl slowly through every small ring, spiralling around the top and counter-spiralling below. Dreamy, for slow sections.' },
+  { label: 'Breathing halves', layout: ['big', 'tb'], A: g('ind', 'breathe', false, 0.5, 4, 0, 215), B: g('ind', 'breathe', true, 0.5, 4, 0, 25),
+    why: 'Each ring fills small ring by small ring and recedes. Top inhales while bottom exhales (half a cycle apart). Calm call and response.' },
+  { label: 'Clock hands', layout: ['big', 'third'], A: g('ind', 'tick12', false, 0.17, 12, 0, 48), B: g('centric', 'breathe', false, 0.6, 8, 0, 215, 0.2),
+    why: 'The 4 X rings tick one small ring per beat like clock hands, over a dim breathing base. Rhythmic accent on a quiet bed.' },
+  { label: 'Polyrhythm 3:2', layout: ['big', 'alt'], A: g('centric', 'chase', false, 0.15, 2, 0, 140), B: g('centric', 'chase', true, 0.15, 3, 0, 350),
+    why: 'Short comets spin every 2 beats on odd rings and every 3 beats (reversed) on even rings. They realign every 6 beats. Hypnotic, groove-heavy.' },
+  { label: 'Meeting arcs', layout: ['big', 'lr'], A: g('arc', 'chase', false, 0.3, 2, 0.5, 48), B: g('arc', 'chase', true, 0.3, 2, -0.5, 300),
+    why: 'On arc the head runs up both sides of each small ring at once, so light flows to the tips (right) or away from them (left).' },
+  { label: 'Glitter duet', layout: ['big', 'alt'], A: g('rand', 'chase', false, 0.2, 1, 0, 185), B: g('rand', 'chase', true, 0.2, 2, 0, 300),
+    why: 'A snake on rand becomes twinkling. Two tempos of glitter in two colors, sparkly and restless, good for high hats or a build.' },
+  { label: 'Surge spiral', layout: ['big', 'tb'], A: g('all', 'surge', false, 0.4, 4, 1, 25), B: g('all', 'surge', true, 0.4, 4, 1, 215),
+    why: 'Slow-fast rotation (sin + linear). The motion pushes forward then eases, like a pulse of acceleration on every bar.' },
+  { label: 'Pendulum pairs', layout: ['big', 'alt'], A: g('updown', 'bounce', false, 0.3, 4, 0.5, 140), B: g('updown', 'bounce', true, 0.3, 4, 0.5, 48),
+    why: 'Ping-pong motion that swings against its neighbour. Gentle, swaying, works well on a half-time groove.' },
+  { label: 'Fill & drain', layout: ['big', 'lr'], A: g('ind', 'fill', false, 0.5, 4, 0, 215), B: g('ind', 'fill', true, 0.5, 4, 0, 25),
+    why: 'One half fills while the other drains, so energy is passed across the installation. Strong for builds and transitions.' },
+  { label: 'Heartbeat cross', layout: ['big', 'third'], A: g('centric', 'heartbeat', false, 0.5, 2, 0, 350), B: g('all', 'chase', false, 0.25, 8, 1, 265, 0.5),
+    why: 'The X rings beat like a heart (tail grows and shrinks) while a slow spiral circles in the background.' },
+  { label: 'Spin vs spiral', layout: ['big', 'alt'], A: g('centric', 'chase', false, 0.35, 2, 0, 185), B: g('centric', 'chase', false, 0.35, 2, 1, 265),
+    why: 'Same motion and tempo. Odd rings spin in unison, even rings carry a wave. The contrast is all in phase, which is subtle and sophisticated.' },
+  { label: 'Bowtie comets', layout: ['big', 'bowtie'], A: g('all', 'chase', false, 0.12, 1, 1, 48), B: g('centric', 'breathe', false, 0.5, 8, 0, 215, 0.5),
+    why: 'Fast comets race through the top and bottom while the sides breathe slowly. Busy center of attention, calm frame.' },
+  { label: 'Pinwheel + shared spiral', layout: ['inside', 'pin'], A: g('all', 'chase', false, 0.5, 4, 1, 215), B: g('all', 'chase', false, 0.5, 4, 1, 25),
+    why: 'Inside split: the pinwheel gives two colors, and one shared spiral runs through both halves of every ring, changing color as it crosses.' },
+  { label: 'Half moons + arc breath', layout: ['inside', 'moons'], A: g('arc', 'breathe', false, 0.5, 4, 0.5, 300), B: g('arc', 'breathe', false, 0.5, 4, 0.5, 185),
+    why: 'Inside split: the breath grows from the inner-facing side (color A) out to the tips (color B) of every small ring, rippling across rings.' },
+  { label: 'Inner/outer + tick', layout: ['inside', 'io'], A: g('ind', 'tick12', false, 0.25, 12, 0, 48), B: g('ind', 'tick12', false, 0.25, 12, 0, 215),
+    why: 'Inside split: one small ring per beat walks around each big ring, gold on the inner side and blue on the outer side.' },
+];
+
+const mSt = { layout: ['big', 'alt'], A: null, B: null, preset: null };
+const applyPreset = pr => { mSt.layout = [...pr.layout]; mSt.A = { ...pr.A }; mSt.B = { ...pr.B }; mSt.preset = pr; renderM(); };
+function chipRowM(parent, label, items, get, set, swatch) {
+  const lab = document.createElement('div'); lab.className = 'label ctl'; lab.textContent = label; parent.appendChild(lab);
+  const row = document.createElement('div'); row.className = 'chips ctl'; parent.appendChild(row);
+  items.forEach(it => {
+    const b = document.createElement('button'); b.textContent = it.label;
+    if (swatch) { b.className = 'swatch'; b.style.background = hsl(it.id); }
+    if (get() === it.id) b.classList.add('on');
+    b.onclick = () => { set(it.id); mSt.preset = null; renderM(); };
+    row.appendChild(b);
+  });
+}
+function renderM() {
+  const inside = mSt.layout[0] === 'inside';
+  for (const [key, colId] of [['A', 'mColA'], ['B', 'mColB']]) {
+    const col = document.getElementById(colId); col.innerHTML = '';
+    const st = mSt[key];
+    col.classList.toggle('disabled', inside && key === 'B');
+    const h = document.createElement('h3');
+    h.innerHTML = `<i style="background:${hsl(st.hue)}"></i>${inside ? (key === 'A' ? 'Shared motion · color s0' : 'Color s1') : (key === 'A' ? 'Group A (G1)' : 'Group B (G2)')}`;
+    col.appendChild(h);
+    if (inside && key === 'B') {
+      const note = document.createElement('div'); note.style.fontSize = '12px'; note.style.color = 'var(--muted)';
+      note.textContent = 'Both parts share the motion set on the left. Only the color is separate:'; col.appendChild(note);
+      const keep = document.createElement('div'); col.appendChild(keep);
+      chipRowM(keep, 'Color', HUES, () => st.hue, v => st.hue = v, true);
+      keep.querySelectorAll('.ctl').forEach(e => e.classList.remove('ctl'));
+      continue;
+    }
+    chipRowM(col, 'Path (segment)', PATHS, () => st.path, v => st.path = v);
+    chipRowM(col, 'Motion', MOTIONS, () => st.motion, v => st.motion = v);
+    chipRowM(col, 'Direction', DIRS, () => st.rev, v => st.rev = v);
+    chipRowM(col, 'Tail length', TAILS, () => st.tail, v => st.tail = v);
+    chipRowM(col, 'Cycle', SPEEDS, () => st.speed, v => st.speed = v);
+    chipRowM(col, 'Wave across rings (phase)', WAVES, () => st.wave, v => st.wave = v);
+    chipRowM(col, 'Level', LEVELS, () => st.level, v => st.level = v);
+    chipRowM(col, 'Color', HUES, () => st.hue, v => st.hue = v, true);
+  }
+  const mark = (id, list, on) => [...document.getElementById(id).children].forEach((b, n) => b.classList.toggle('on', on(list[n])));
+  mark('mBigChips', BIG.filter(b => b.id !== 'none'), it => mSt.layout[0] === 'big' && mSt.layout[1] === it.id);
+  mark('mInsideChips', INSIDE.filter(i => i.id !== 'whole'), it => mSt.layout[0] === 'inside' && mSt.layout[1] === it.id);
+  mark('mPresetChips', M_PRESETS, it => mSt.preset === it);
+  renderMInfo();
+}
+const mBigItems = BIG.filter(b => b.id !== 'none'), mInsideItems = INSIDE.filter(i => i.id !== 'whole');
+mBigItems.forEach(it => { const b = document.createElement('button'); b.textContent = it.label; b.onclick = () => { mSt.layout = ['big', it.id]; mSt.preset = null; renderM(); }; document.getElementById('mBigChips').appendChild(b); });
+mInsideItems.forEach(it => { const b = document.createElement('button'); b.textContent = it.label; b.onclick = () => { mSt.layout = ['inside', it.id]; mSt.preset = null; renderM(); }; document.getElementById('mInsideChips').appendChild(b); });
+M_PRESETS.forEach(pr => { const b = document.createElement('button'); b.textContent = pr.label; b.onclick = () => applyPreset(pr); document.getElementById('mPresetChips').appendChild(b); });
+const mBeat = document.getElementById('mBeat'); for (let i = 0; i < 12; i++) mBeat.appendChild(document.createElement('span'));
+
+// Ring groups for the current layout, each in element order (order drives the phase wave).
+function mGroups(ms = mSt) {
+  if (ms.layout[0] === 'inside') return [{ key: 'A', rings: [1,2,3,4,5,6,7,8,9,10,11,12] }];
+  const big = BIG.find(b => b.id === ms.layout[1]);
+  return [{ key: 'A', rings: big.G1 }, { key: 'B', rings: [1,2,3,4,5,6,7,8,9,10,11,12].filter(r => !big.G1.includes(r)) }];
+}
+const fcvM = document.getElementById('fullM'), fctxM = fcvM.getContext('2d');
+function drawMotionState(g2, W, ms, now, thumb) {
+  const beat = now / BEAT_MS, k = W / 1040;
+  g2.fillStyle = css('--panel'); g2.fillRect(0, 0, W, W);
+  const C = W / 2, off = css('--off');
+  const inside = ms.layout[0] === 'inside';
+  const ins = inside ? INSIDE.find(i => i.id === ms.layout[1]) : null;
+  if (!thumb) { g2.font = '26px -apple-system, sans-serif'; g2.textAlign = 'center'; }
+  for (const grp of mGroups(ms)) {
+    const st = ms[grp.key], mo = MOTIONS.find(m => m.id === st.motion), rel = SEGMENTS[st.path];
+    const t = ((beat / st.speed) % 1 + 1) % 1;
+    grp.rings.forEach((r, idx) => {
+      const sp = mo.sim(perElementPhase(idx, grp.rings.length, st.wave), st.rev, st.tail);
+      const head = sp && evalF(t, sp.head), tail = sp && evalF(t, sp.tail);
+      if (!thumb) {
+        const a = (r + 0.5) * Math.PI / 6;
+        g2.fillStyle = css('--muted'); g2.fillText(String(r), C + (FULL.R - 130) * k * Math.sin(a), C - (FULL.R - 130) * k * Math.cos(a) + 9);
+      }
+      for (let i = 0; i < 144; i++) {
+        const v = (sp ? snakeMask(rel[i], head, tail, sp.cyclic) : 1) * st.level;
+        const hue = inside ? (ins.s0(Math.floor(i / 12), i) ? ms.A.hue : ms.B.hue) : st.hue;
+        const [x, y] = fullPixelXY(r, i);
+        g2.fillStyle = v > 0.02 ? hsl(hue, 12 + 52 * v, 90) : off;
+        if (thumb) g2.fillRect(x * k - 1.1, y * k - 1.1, 2.4, 2.4);
+        else { g2.beginPath(); g2.arc(x, y, FULL.pix, 0, Math.PI * 2); g2.fill(); }
+      }
+    });
+  }
+}
+function drawMotion(now) {
+  drawMotionState(fctxM, fcvM.width, mSt, now, false);
+  [...mBeat.children].forEach((sp, n) => sp.classList.toggle('on', n === Math.floor(now / BEAT_MS) % 12));
+}
+
+// Motion tags + description + generated code.
+function motionTagList(ms = mSt) {
+  const A = ms.A, B = ms.B, inside = ms.layout[0] === 'inside', tags = [];
+  const T = (group, label, title) => tags.push({ group, label, title });
+  const energy = st => st.motion === 'static' ? 0 : (4 / st.speed) * ({ tick4: 1.3, tick12: 1.2, breathe: 0.6, heartbeat: 0.9, fill: 0.7, bounce: 0.8, surge: 1.1 }[st.motion] || 1) * (st.tail < 0.2 ? 1.3 : 1) * st.level;
+  const e = inside ? energy(A) : (energy(A) + energy(B)) / 2;
+  T('feel', e < 0.5 ? 'Calm' : e < 1.3 ? 'Lively' : 'Intense', 'overall energy from tempo, motion type and tail');
+  if (inside) { T('grain', 'Shared motion', 'both parts move together; they differ in color'); }
+  else {
+    const same = A.motion === B.motion && A.path === B.path;
+    T('symmetry', same && A.rev !== B.rev ? 'Opposite directions' : same && A.rev === B.rev ? 'Same direction' : 'Different motions', 'how the two groups\' motions relate');
+    const ratio = Math.max(A.speed, B.speed) / Math.min(A.speed, B.speed);
+    T('balance', ratio === 1 ? 'Same tempo' : ratio === 2 ? 'Tempo 2:1' : ratio === 1.5 ? 'Polyrhythm 3:2' : ratio === 3 ? 'Tempo 3:1' : `Tempo ${A.speed}:${B.speed}`, 'cycle lengths of the two groups');
+    if (same && A.rev !== B.rev && A.wave === -B.wave && A.wave !== 0 && ['lr', 'tb'].includes(ms.layout[1])) T('symmetry', 'Mirror', 'the halves are mirror images in motion');
+    if (A.level !== B.level) T('balance', 'Foreground / background', 'one group is dimmer, a quiet bed');
+  }
+  const waves = inside ? [A.wave] : [A.wave, B.wave];
+  T('order', waves.every(w => w === 0) ? 'Unison' : 'Waves across rings', 'phase spread between rings in a group');
+  const cov = st => st.motion === 'static' || st.motion === 'fill' ? 1 : st.tail;
+  const c = inside ? cov(A) : (cov(A) + cov(B)) / 2;
+  T('coverage', c < 0.3 ? 'Sparse' : c < 0.7 ? 'Medium coverage' : 'Mostly lit', 'how much of each path is lit at once');
+  T('cost', `Cost ${1 + (inside ? 2 : 0) + 1 + ((inside ? [A] : [A, B]).some(s => s.level < 1) ? 1 : 0)}`, 'effects per ring per layer: color, motion, optional level / position_hue');
+  return tags;
+}
+const motionTags = (ms = mSt) => motionTagList(ms).map(t => `<span class="tag" title="${t.title}" style="--th:${TAG_COLORS[t.group] ?? 120}">${t.label}</span>`).join('');
+
+const SEGCONST = { all: 'segment_all', centric: 'segment_centric', ind: 'segment_ind', arc: 'segment_arc', updown: 'segment_updown', rand: 'segment_rand', b1: 'segment_b1', b2: 'segment_b2' };
+const hueN = h => r3(h / 360);
+function groupCode(st, ringsExpr, colorLines) {
+  const mo = MOTIONS.find(m => m.id === st.motion), mc = mo.code(st.rev, st.tail);
+  const inner = [...colorLines, ...(st.level < 1 ? [`brightness({ value: ${st.level} });`] : []), ...(mc ? [`cycle(${st.speed}, () => ${mc});`] : [])];
+  const body = st.wave !== 0 ? `phase(${st.wave}, () => {\n      ${inner.join('\n      ')}\n    })` : `{\n      ${inner.join('\n      ')}\n    }`;
+  return `  elements(${ringsExpr}, () => segment(${SEGCONST[st.path]}, () => ${st.wave !== 0 ? body : body.replace(/^\{/, '{')}));`;
+}
+const INSIDE_HUE = {   // s1 color via position_hue on the inside split's own segment: [segment, offset FloatFunction(delta)]
+  io: ['ind', d => ({ half: { f1: { half: { f1: K(0), f2: K(d) } }, f2: { half: { f1: K(d), f2: K(0) } } } })],
+  pin: ['ind', d => ({ half: { f1: K(0), f2: K(d) } })],
+  teeth: ['ind', d => S(0, d, 0.75, 6)],
+  moons: ['arc', d => ({ half: { f1: K(0), f2: K(d) } })],
+  stripes: ['centric', d => S(0, d, 0.75, 6)],
+  stars: ['rand', d => ({ half: { f1: K(0), f2: K(d) } })],
+  sunlit: ['updown', d => ({ half: { f1: K(0), f2: K(d) } })],
+};
+function mCode() {
+  const A = mSt.A, B = mSt.B;
+  const head = `beats(0, 16, () => {`;
+  if (mSt.layout[0] === 'inside') {
+    const id = mSt.layout[1];
+    const st = { ...A };
+    let colorBlock;
+    if (id === 'dots') colorBlock = `  elements(all, () => segment(segment_b1, () => constColor({ hue: ${hueN(A.hue)} })));\n  elements(all, () => segment(segment_b2, () => constColor({ hue: ${hueN(B.hue)} })));`;
+    else {
+      const [seg, fn] = INSIDE_HUE[id], d = r3(((B.hue - A.hue + 360) % 360) / 360);
+      colorBlock = `  elements(all, () => segment(${SEGCONST[seg]}, () => {        // two colors from one layer\n    constColor({ hue: ${hueN(A.hue)} });\n    addEffect({ position_hue: { offset_factor: ${fmt(fn(d))} } });\n  }));`;
+    }
+    return `${head}\n${colorBlock}\n${groupCode(st, 'all', [])}   // shared motion: brightness on every pixel\n});`;
+  }
+  const big = BIG.find(b => b.id === mSt.layout[1]);
+  const G2 = [1,2,3,4,5,6,7,8,9,10,11,12].filter(r => !big.G1.includes(r));
+  return `${head}\n${groupCode(A, `[${big.G1.join(', ')}]`, [`constColor({ hue: ${hueN(A.hue)} });`])}\n${groupCode(B, `[${G2.join(', ')}]`, [`constColor({ hue: ${hueN(B.hue)} });`])}\n});`;
+}
+function renderMInfo() {
+  const A = mSt.A, B = mSt.B, inside = mSt.layout[0] === 'inside';
+  const moA = MOTIONS.find(m => m.id === A.motion), moB = MOTIONS.find(m => m.id === B.motion);
+  const pA = PATHS.find(x => x.id === A.path), pB = PATHS.find(x => x.id === B.path);
+  const desc = mSt.preset ? `<p><b>${mSt.preset.label}.</b> ${mSt.preset.why}</p>` : '';
+  const parts = inside
+    ? `<p><b>Shared:</b> ${moA.label.toLowerCase()} (${moA.why}) on <code>${A.path}</code> (${pA.why}).</p>`
+    : `<p><b>A:</b> ${moA.label.toLowerCase()}, ${moA.why}; path <code>${A.path}</code> (${pA.why}).<br><b>B:</b> ${moB.label.toLowerCase()}, ${moB.why}; path <code>${B.path}</code> (${pB.why}).</p>`;
+  document.getElementById('mInfo').innerHTML = `<div class="tags big">${motionTags()}</div>${desc}${parts}`;
+  document.getElementById('mCode').textContent = mCode();
+}
+applyPreset(M_PRESETS[0]);
+
+
+// ---- More motions: hand-designed presets, generated relationship families, inside splits ----
+const MORE_PRESETS = [
+  { label: 'Orbit & moon', layout: ['big', 'alt'], A: g('all', 'chase', false, 0.5, 8, 1, 265), B: g('centric', 'chase', false, 0.1, 1, 0, 48, 0.6),
+    why: 'A slow orbit spirals through odd rings while tiny fast moons spin on even rings. Two time scales at once.' },
+  { label: 'Cogs', layout: ['big', 'alt'], A: g('ind', 'tick12', false, 0.17, 12, 0, 48), B: g('ind', 'tick12', true, 0.17, 12, 0, 185),
+    why: 'Neighbouring rings tick one small ring per beat in opposite directions, like meshing gears.' },
+  { label: 'Tick-tock', layout: ['big', 'lr'], A: g('ind', 'tick4', false, 0.25, 2, 0, 215), B: g('ind', 'tick4', true, 0.25, 2, 0, 25),
+    why: 'Quarter-turn jumps on every half beat: right turns one way, left the other. Very rhythmic and mechanical.' },
+  { label: 'Lighthouse', layout: ['big', 'bowtie'], A: g('all', 'chase', false, 0.25, 4, 1, 48), B: g('all', 'static', false, 0.5, 4, 0, 215, 0.2),
+    why: 'A beam sweeps the top and bottom rings while the sides glow dimly. Simple, cinematic, great for intros.' },
+  { label: 'Ripples', layout: ['big', 'lr'], A: g('arc', 'breathe', false, 0.5, 4, 1, 185), B: g('arc', 'breathe', true, 0.5, 4, -1, 140),
+    why: 'Each small ring breathes from its inner side to its tip, with the breath rolling around each half in mirror image.' },
+  { label: 'Overtake', layout: ['big', 'tb'], A: g('all', 'chase', false, 0.12, 3, 1, 350), B: g('all', 'chase', false, 0.12, 4, 1, 48),
+    why: 'Comets race the same way at 3 and 4 beats per lap, so the top keeps overtaking the bottom and they realign every 12 beats.' },
+  { label: 'Swirl & sparkle', layout: ['big', 'lr'], A: g('all', 'surge', false, 0.5, 4, 1, 265), B: g('rand', 'chase', false, 0.15, 1, 0, 185),
+    why: 'One half swirls with slow-fast surges and the other glitters. Texture against flow.' },
+  { label: 'Breathing X', layout: ['big', 'third'], A: g('centric', 'breathe', false, 0.5, 4, 0, 300), B: g('centric', 'breathe', true, 0.5, 4, 0, 215, 0.5),
+    why: 'The X rings breathe in while the rest breathe out at half brightness. Calm, symmetrical, slow songs.' },
+  { label: 'Rain', layout: ['big', 'alt'], A: g('updown', 'chase', false, 0.3, 1, 0.25, 215), B: g('updown', 'chase', false, 0.3, 2, 0.25, 185),
+    why: 'If updown is "absolute direction", light falls the same way in every small ring like rain, at two speeds. Check on hardware.' },
+  { label: 'Metronome', layout: ['big', 'lr'], A: g('updown', 'bounce', false, 0.2, 2, 0, 140), B: g('updown', 'bounce', true, 0.2, 2, 0, 48),
+    why: 'Short ping-pong swings in opposite phase on the two halves, like two metronomes ticking against each other.' },
+  { label: 'Stained glass', layout: ['inside', 'teeth'], A: g('centric', 'breathe', false, 0.6, 8, 0.5, 300), B: g('centric', 'breathe', false, 0.6, 8, 0.5, 48),
+    why: 'Inside split: gear-teeth colors with a slow shared breath rolling across rings. Rich color, gentle motion.' },
+  { label: 'Starlit spiral', layout: ['inside', 'stars'], A: g('all', 'chase', false, 0.5, 4, 1, 265), B: g('all', 'chase', false, 0.5, 4, 1, 185),
+    why: 'Inside split: a spiral sweeps through a two-color star field, revealing both colors as it passes.' },
+  { label: 'Woven light', layout: ['inside', 'stripes'], A: g('centric', 'chase', false, 0.3, 2, 1, 25), B: g('centric', 'chase', false, 0.3, 2, 1, 215),
+    why: 'Inside split: every other pixel alternates color, and a spinning snake makes the weave shimmer.' },
+  { label: 'Compass sweep', layout: ['inside', 'sunlit'], A: g('updown', 'chase', false, 0.4, 4, 0, 48), B: g('updown', 'chase', false, 0.4, 4, 0, 350),
+    why: 'Inside split: two-tone light sweeps across every small ring in the same absolute direction (unconfirmed).' },
+  { label: 'Heart of the X', layout: ['big', 'third'], A: g('centric', 'heartbeat', false, 0.5, 2, 0, 350), B: g('ind', 'breathe', false, 0.5, 8, 0, 265, 0.2),
+    why: 'The X beats like a heart and the rest barely breathes. Maximum focus on the four diagonal rings.' },
+  { label: 'Double helix', layout: ['big', 'alt'], A: g('all', 'chase', false, 0.3, 4, 1, 185), B: g('all', 'chase', false, 0.3, 4, -1, 300),
+    why: 'Same direction, but the waves run opposite ways around the circle, so two spirals cross through each other.' },
+  { label: 'Firefly field', layout: ['big', 'alt'], A: g('rand', 'breathe', false, 0.3, 4, 0.5, 48), B: g('rand', 'breathe', true, 0.3, 3, 0.5, 140),
+    why: 'Random pixels swell and fade at two slightly different tempos. Organic, never repeats exactly.' },
+  { label: 'Drumline', layout: ['big', 'third'], A: g('ind', 'tick4', false, 0.25, 1, 0, 350), B: g('all', 'chase', false, 0.4, 4, 1, 215, 0.5),
+    why: 'The X rings snap a quarter-turn on every beat over a rolling spiral, like a snare over a bassline.' },
+  { label: 'Sunrise', layout: ['big', 'tb'], A: g('ind', 'fill', false, 0.5, 8, 0, 48), B: g('arc', 'breathe', false, 0.5, 8, 0, 25, 0.5),
+    why: 'The top slowly fills with gold while the bottom glows warm and soft. For openings and slow builds.' },
+  { label: 'Spokes', layout: ['big', 'alt'], A: g('ind', 'tick12', false, 0.5, 4, 1, 215), B: g('ind', 'tick12', true, 0.5, 4, 1, 25),
+    why: 'Long, fast-stepping tails form rotating spokes, opposite on neighbouring rings. Mechanical and bright.' },
+  { label: 'Slow tide', layout: ['big', 'tb'], A: g('ind', 'fill', false, 0.5, 8, 0.5, 185), B: g('ind', 'fill', true, 0.5, 8, -0.5, 215),
+    why: 'Top fills while bottom drains in a rolling wave, like a tide moving between the halves.' },
+];
+
+// Relationship families, applied to every ring layout.
+const LAYS = ['lr', 'tb', 'third', 'alt', 'bowtie'];
+const FAMILIES = [
+  { id: 'opp', label: 'Opposite chase', make: () => [g('all', 'chase', false, 0.35, 4, 1, 215), g('all', 'chase', true, 0.35, 4, 1, 25)],
+    why: 'Same spiral, opposite directions.' },
+  { id: 'mirror', label: 'Mirror', only: ['lr', 'tb'], make: () => [g('centric', 'chase', false, 0.4, 2, 1, 185), g('centric', 'chase', true, 0.4, 2, -1, 300)],
+    why: 'Reverse direction + reversed wave = exact mirror images.' },
+  { id: 'poly', label: 'Polyrhythm 3:2', make: () => [g('centric', 'chase', false, 0.15, 2, 0, 140), g('centric', 'chase', true, 0.15, 3, 0, 350)],
+    why: 'Comets on 2- and 3-beat cycles; they realign every 6 beats.' },
+  { id: 'wave', label: 'Unison vs wave', make: () => [g('centric', 'chase', false, 0.35, 2, 0, 185), g('centric', 'chase', false, 0.35, 2, 1, 265)],
+    why: 'Identical motion; only the phase spread differs.' },
+  { id: 'fg', label: 'Foreground / background', make: () => [g('all', 'chase', false, 0.12, 1, 1, 48), g('centric', 'breathe', false, 0.5, 8, 0, 215, 0.2)],
+    why: 'Fast bright comets over a slow dim breath.' },
+  { id: 'call', label: 'Call & response', make: () => [g('ind', 'breathe', false, 0.5, 4, 0, 215), g('ind', 'breathe', true, 0.5, 4, 0, 25)],
+    why: 'One group breathes in while the other breathes out.' },
+  { id: 'tickglow', label: 'Tick vs glow', make: () => [g('ind', 'tick4', false, 0.25, 2, 0, 350), g('all', 'chase', false, 0.6, 8, 1, 265)],
+    why: 'Mechanical jumps against a long flowing glow.' },
+];
+const FAMILY_PRESETS = [];
+for (const fam of FAMILIES) for (const lay of LAYS) {
+  if (fam.only && !fam.only.includes(lay)) continue;
+  const [A, B] = fam.make();
+  FAMILY_PRESETS.push({ label: fam.label, layout: ['big', lay], A, B, why: fam.why + ' Layout: ' + BIG.find(b => b.id === lay).why + '.' });
+}
+
+// Inside splits × shared motions.
+const SHARED = [
+  { label: 'spiral', A: () => g('all', 'chase', false, 0.5, 4, 1, 0) },
+  { label: 'arc breath', A: () => g('arc', 'breathe', false, 0.5, 4, 0.5, 0) },
+  { label: 'tick', A: () => g('ind', 'tick12', false, 0.25, 12, 0, 0) },
+  { label: 'glitter', A: () => g('rand', 'chase', false, 0.2, 2, 0, 0) },
+];
+const PAIR_HUES = [[215, 25], [300, 48], [185, 350], [140, 265]];
+const INSIDE_PRESETS = [];
+INSIDE.filter(i => i.id !== 'whole').forEach((ins, n) => SHARED.forEach((sh, m) => {
+  const [h1, h2] = PAIR_HUES[(n + m) % PAIR_HUES.length];
+  INSIDE_PRESETS.push({ label: `${ins.label} + ${sh.label}`, layout: ['inside', ins.id], A: { ...sh.A(), hue: h1 }, B: { ...sh.A(), hue: h2 },
+    why: `Inside split (${ins.why}) colors, with one shared ${sh.label} running through both.` });
+}));
+
+// Gallery groups with live cards. Only cards on screen are redrawn, at ~30 fps.
+const M_CARDS = [], M_CARD_ELS = [];
+const io6 = window.IntersectionObserver ? new IntersectionObserver(es => es.forEach(e => { const c = M_CARDS.find(c => c.cv === e.target); if (c) c.visible = e.isIntersecting; })) : null;
+function motionGalleryGroup(title, presets) {
+  const lab = document.createElement('div'); lab.className = 'label'; lab.style.marginTop = '20px';
+  lab.innerHTML = `${title} <span style="text-transform:none;letter-spacing:0">(${presets.length})</span>`;
+  const grid = document.createElement('div'); grid.className = 'gallery mgallery';
+  const wrap = document.getElementById('mGalleryWrap'); wrap.appendChild(lab); wrap.appendChild(grid);
+  presets.forEach(pr => {
+    const card = document.createElement('button'); card.className = 'thumb';
+    const cv = document.createElement('canvas'); cv.width = 300; cv.height = 300;
+    const lay = pr.layout[0] === 'big' ? BIG.find(b => b.id === pr.layout[1]).label : 'inside: ' + INSIDE.find(i => i.id === pr.layout[1]).label;
+    const ms = { layout: pr.layout, A: pr.A, B: pr.B };
+    card.appendChild(cv);
+    const cap = document.createElement('div'); cap.className = 'cap';
+    cap.innerHTML = `<b>${pr.label}</b> <span style="color:var(--muted)">· ${lay}</span>`;
+    const tg = document.createElement('div'); tg.className = 'tags'; tg.innerHTML = motionTags(ms);
+    const why = document.createElement('div'); why.className = 'why'; why.textContent = pr.why;
+    card.appendChild(cap); card.appendChild(tg); card.appendChild(why);
+    card._tags = motionTagList(ms);
+    card.onclick = () => { applyPreset(pr); document.getElementById('panel6').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    grid.appendChild(card); M_CARD_ELS.push(card);
+    const c = { cv, g2: cv.getContext('2d'), ms, visible: !io6 };
+    M_CARDS.push(c); if (io6) io6.observe(cv);
+  });
+}
+motionGalleryGroup('Selected', M_PRESETS);
+motionGalleryGroup('More hand-designed', MORE_PRESETS);
+motionGalleryGroup('Relationship × layout', FAMILY_PRESETS);
+motionGalleryGroup('Inside split × shared motion', INSIDE_PRESETS);
+filterBar(document.getElementById('mGalleryWrap'), M_CARD_ELS);
+
+/* ---------- 7. Stacked snakes ---------- */
+// Symbolic head/tail for raw effects (p = per-ring phase), mirroring MOTIONS[].sim.
+function motionSym(id, rev, T) {
+  const P = x => PV(x);
+  switch (id) {
+    case 'chase': return { head: { linear: rev ? { start: P(1), end: P(0) } : { start: P(0), end: P(1) } }, tail: K(T), cyclic: true };
+    case 'tick4': return { head: { steps: { num_steps: 4, diff_per_step: rev ? -0.25 : 0.25, first_step_value: P(rev ? 1 : 0) } }, tail: K(T), cyclic: true };
+    case 'tick12': return { head: { steps: { num_steps: 12, diff_per_step: rev ? -r3(1 / 12) : r3(1 / 12), first_step_value: P(rev ? 1 : 0) } }, tail: K(T), cyclic: true };
+    case 'surge': return { head: { comb2: { f1: { sin: { min: rev ? 1 : 0, max: rev ? 0 : 1, phase: P(0), repeats: 1 } }, amount1: 1, f2: L(rev ? 1 : 0, rev ? 0 : 1), amount2: 1 } }, tail: K(T), cyclic: true };
+    case 'breathe': return { head: { sin: { min: 0, max: 1, phase: P(rev ? 0.5 : 0), repeats: 1 } }, tail: K(T), cyclic: false };
+    case 'bounce': return { head: { half: rev ? { f1: { linear: { start: P(1), end: P(0) } }, f2: { linear: { start: P(0), end: P(1) } } } : { f1: { linear: { start: P(0), end: P(1) } }, f2: { linear: { start: P(1), end: P(0) } } } }, tail: K(T), cyclic: true };
+    case 'heartbeat': return { head: { sin: { min: 0, max: 1, phase: P(rev ? 0.5 : 0), repeats: 1 } }, tail: { half: { f1: L(0.5, 1), f2: L(1, 0.5) } }, cyclic: true };
+    case 'fill': return { head: { linear: rev ? { start: P(1), end: P(0) } : { start: P(0), end: P(1) } }, tail: K(3), cyclic: false };
+  }
+  return null;
+}
+// snake_brightness / snake_hue membership, matching kivsee-render: returns the snake index 0 (tail) .. 1 (head), or null.
+function snakeIdx(rel, head, tail, cyclic) {
+  const h = cyclic ? head - Math.trunc(head) : head, ct = h - tail;
+  let idx = null;
+  if (cyclic && ct < 0) { const w = ct + 1; if (rel >= w) idx = (rel - w) / tail; else if (rel <= h) idx = ((1 - w) + rel) / tail; }
+  else if (rel >= ct && rel <= h) idx = tail > 0 ? (rel - ct) / tail : 1;
+  return idx === null ? null : Math.max(0, Math.min(1, idx));
+}
+const BLENDS = [
+  { id: 'and', label: 'Intersect', why: 'layer 2 is another snake: brightness multiplies, so only the overlap lights' },
+  { id: 'or', label: 'Add', why: 'layer 2 is snake_brightness (increase): it pushes its pixels up to full, so both snakes show and the overlap glows' },
+  { id: 'shadow', label: 'Shadow', why: 'layer 2 is snake_brightness (decrease): a dark snake cuts through layer 1' },
+  { id: 'hue', label: 'Color band', why: 'layer 2 is snake_hue: it shifts the color of whatever it passes over' },
+];
+const STYLES = [{ id: 'solid', label: 'Solid' }, { id: 'grad', label: 'Gradient' }];
+const HUE_OFFS = [0, 0.12, 0.25, 0.33, 0.5].map(v => ({ id: v, label: v === 0 ? 'none' : '+' + v }));
+const S_LAYOUTS = [
+  { id: 'all', label: 'All rings' }, { id: 'lr', label: 'Left / right mirrored' }, { id: 'tb', label: 'Top / bottom mirrored' }, { id: 'alt', label: 'Alternate reversed' },
+];
+const MOTIONS_L1 = MOTIONS;                                  // layer 1 may be static (full light)
+const MOTIONS_L2 = MOTIONS.filter(m => m.id !== 'static');
+const ly = (path, motion, rev, tail, speed, wave) => ({ path, motion, rev, tail, speed, wave });
+const stk = (label, blend, style, hueOff, hue, L1, L2, why, layout = 'all') => ({ label, blend, style, hueOff, hue, L1, L2, why, layout });
+const S_PRESETS = [
+  stk('Crossing flashes', 'and', 'solid', 0, 48, ly('centric', 'chase', false, 0.5, 2, 0), ly('centric', 'chase', true, 0.5, 2, 0),
+    'Two half-ring snakes spin against each other; only where they overlap is lit, so light pulses at the crossing points twice per cycle.'),
+  stk('Window spin', 'and', 'solid', 0, 185, ly('all', 'chase', false, 0.35, 8, 1), ly('centric', 'chase', false, 0.3, 1, 0),
+    'A slow window travels around each big ring and a fast spin shows only inside it. Movement inside movement.'),
+  stk('Glitter comet', 'and', 'solid', 0, 265, ly('all', 'chase', false, 0.3, 4, 1), ly('rand', 'chase', false, 0.5, 1, 0),
+    'A comet made of sparkles: the rand snake twinkles, but only inside the travelling comet.'),
+  stk('Breathing spokes', 'and', 'solid', 0, 350, ly('ind', 'breathe', false, 0.5, 4, 0), ly('centric', 'chase', false, 0.25, 1, 0),
+    'Spinning dashes inside a breath that grows small ring by small ring. Dense but rhythmic.'),
+  stk('Heartbeat in the dark', 'and', 'solid', 0, 350, ly('centric', 'heartbeat', false, 0.5, 2, 0), ly('ind', 'breathe', false, 0.6, 8, 0.5),
+    'The heartbeat only shows where a slow breath allows it, so the pulse fades in and out around the circle.'),
+  stk('Gated glitter', 'and', 'solid', 0, 140, ly('ind', 'tick4', false, 0.5, 2, 0), ly('rand', 'chase', false, 0.3, 1, 0),
+    'Glitter that jumps a quarter turn every half beat: a ticking window on a sparkle field.'),
+  stk('Twin comets', 'or', 'solid', 0.5, 215, ly('all', 'chase', false, 0.2, 4, 1), ly('all', 'chase', true, 0.2, 4, 1),
+    'Two comets in complementary colors fly opposite ways and flare where they cross.'),
+  stk('Spin over spiral', 'or', 'grad', 0.33, 265, ly('all', 'chase', false, 0.5, 8, 1), ly('centric', 'chase', false, 0.15, 2, 0),
+    'A slow spiral as the base with small fast spinners in a second color on top. Two layers of motion that stay readable.'),
+  stk('Searchlights', 'or', 'grad', 0, 48, ly('all', 'chase', false, 0.15, 4, 1), ly('all', 'chase', false, 0.15, 3, 1),
+    'Two beams at 3 and 4 beats per lap sweep the same way and keep overtaking each other.'),
+  stk('Eclipse', 'shadow', 'solid', 0, 25, ly('all', 'static', false, 0.5, 4, 0), ly('all', 'chase', false, 0.2, 4, 1),
+    'Everything is lit and a dark gap orbits through each ring. A negative-space chase: dramatic and very readable.'),
+  stk('Ripple shadow', 'shadow', 'grad', 0, 185, ly('all', 'static', false, 0.5, 4, 0), ly('arc', 'breathe', false, 0.4, 4, 0.5),
+    'Soft dark ripples breathe out from the inner side of every small ring over full light.'),
+  stk('Color river', 'hue', 'grad', 0.33, 215, ly('all', 'static', false, 0.5, 4, 0), ly('all', 'chase', false, 0.5, 8, 1),
+    'Full light, with a band of shifted color flowing slowly around every ring. Elegant, low energy.'),
+  stk('Rainbow ticks', 'hue', 'solid', 0.5, 300, ly('centric', 'breathe', false, 0.6, 4, 0), ly('ind', 'tick12', false, 0.25, 12, 0),
+    'A breathing base where one small ring per beat flips to the opposite color, like a clock hand painted in light.'),
+  stk('Aurora', 'hue', 'grad', 0.25, 140, ly('all', 'chase', false, 0.8, 8, 1), ly('all', 'chase', false, 0.5, 3, -1),
+    'A long glow drifts one way while a color shift flows the other way through it. Shimmering, organic color.'),
+  stk('Mirror eclipse', 'shadow', 'solid', 0, 48, ly('all', 'static', false, 0.5, 4, 0), ly('centric', 'chase', false, 0.3, 2, 1),
+    'Shadows spin through lit rings, mirrored between the left and right halves.', 'lr'),
+  stk('Counter-crossing', 'and', 'solid', 0, 185, ly('centric', 'chase', false, 0.5, 2, 0), ly('centric', 'chase', true, 0.5, 2, 0),
+    'Crossing flashes whose direction flips from ring to ring, so neighbouring rings pulse against each other.', 'alt'),
+];
+// Generated combinations: each blend × a set of layer pairings.
+const PAIRS = [
+  ['spiral × spin', ly('all', 'chase', false, 0.4, 8, 1), ly('centric', 'chase', false, 0.25, 1, 0)],
+  ['breath × tick', ly('ind', 'breathe', false, 0.6, 4, 0), ly('ind', 'tick12', false, 0.25, 12, 0)],
+  ['spin × counter-spin', ly('centric', 'chase', false, 0.4, 2, 0), ly('centric', 'chase', true, 0.4, 2, 0)],
+  ['glow × glitter', ly('all', 'chase', false, 0.6, 8, 1), ly('rand', 'chase', false, 0.3, 1, 0)],
+  ['arc breath × spiral', ly('arc', 'breathe', false, 0.5, 4, 0.5), ly('all', 'chase', false, 0.3, 4, 1)],
+  ['surge × ping-pong', ly('all', 'surge', false, 0.4, 4, 1), ly('updown', 'bounce', false, 0.3, 2, 0)],
+];
+const GEN_HUES = [215, 25, 140, 300, 48, 185];
+const S_GENERATED = [];
+BLENDS.forEach((b, bi) => PAIRS.forEach(([name, L1, L2], pi) => {
+  const l1 = (b.id === 'shadow' || b.id === 'hue') && pi % 2 === 1 ? ly('all', 'static', false, 0.5, 4, 0) : L1;
+  S_GENERATED.push(stk(`${b.label}: ${l1.motion === 'static' ? 'full light' : name.split(' × ')[0]} × ${name.split(' × ')[1]}`, b.id, pi % 2 ? 'grad' : 'solid',
+    b.id === 'or' || b.id === 'hue' ? [0.5, 0.33, 0.25][pi % 3] : 0, GEN_HUES[(bi + pi) % GEN_HUES.length], l1, L2,
+    `${b.why[0].toUpperCase() + b.why.slice(1)}.`));
+}));
+
+const sSt = { ...S_PRESETS[0], L1: { ...S_PRESETS[0].L1 }, L2: { ...S_PRESETS[0].L2 }, preset: S_PRESETS[0] };
+const loadStack = pr => { Object.assign(sSt, pr, { L1: { ...pr.L1 }, L2: { ...pr.L2 }, preset: pr }); renderS(); };
+
+// Groups for the stack: all rings, or two mirrored/reversed groups.
+function sGroups(st) {
+  const ALL12 = [1,2,3,4,5,6,7,8,9,10,11,12];
+  if (st.layout === 'all') return [{ rings: ALL12, flip: false }];
+  const G1 = BIG.find(b => b.id === st.layout).G1, G2 = ALL12.filter(r => !G1.includes(r));
+  const mirrored = st.layout !== 'alt';                        // lr/tb: reverse + negated wave; alt: reverse only
+  return [{ rings: G1, flip: false }, { rings: G2, flip: true, negWave: mirrored }];
+}
+const flipLayer = (L, grp) => grp.flip ? { ...L, rev: !L.rev, wave: grp.negWave ? -L.wave : L.wave } : L;
+function drawStack(g2, W, st, now, thumb) {
+  const beat = now / BEAT_MS, k = W / 1040, off = css('--off');
+  g2.fillStyle = css('--panel'); g2.fillRect(0, 0, W, W);
+  const m1 = MOTIONS.find(m => m.id === st.L1.motion), m2 = MOTIONS.find(m => m.id === st.L2.motion);
+  for (const grp of sGroups(st)) {
+    const L1 = flipLayer(st.L1, grp), L2 = flipLayer(st.L2, grp);
+    const t1 = ((beat / L1.speed) % 1 + 1) % 1, t2 = ((beat / L2.speed) % 1 + 1) % 1;
+    const rel1 = SEGMENTS[L1.path], rel2 = SEGMENTS[L2.path];
+    grp.rings.forEach((r, idx) => {
+      const s1 = m1.sim(perElementPhase(idx, grp.rings.length, L1.wave), L1.rev, L1.tail);
+      const s2 = m2.sim(perElementPhase(idx, grp.rings.length, L2.wave), L2.rev, L2.tail);
+      const h1 = s1 && evalF(t1, s1.head), tl1 = s1 && evalF(t1, s1.tail);
+      const h2 = evalF(t2, s2.head), tl2 = evalF(t2, s2.tail);
+      for (let i = 0; i < 144; i++) {
+        let val = 1, hue = st.hue;                                   // constColor
+        if (s1) val *= snakeMask(rel1[i], h1, tl1, s1.cyclic);       // layer 1: snake
+        if (st.blend === 'and') val *= snakeMask(rel2[i], h2, tl2, s2.cyclic);
+        else {
+          const ix = snakeIdx(rel2[i], h2, tl2, s2.cyclic);
+          if (ix !== null) {
+            if (st.blend === 'or') { const f = st.style === 'solid' ? 1 : ix; val = val + (1 - val) * f; hue += 360 * st.hueOff; }
+            else if (st.blend === 'shadow') val *= st.style === 'solid' ? 0 : 1 - ix;
+            else hue += 360 * st.hueOff * (st.style === 'solid' ? 1 : ix);
+          }
+        }
+        const [x, y] = fullPixelXY(r, i);
+        g2.fillStyle = val > 0.02 ? hsl(hue, 12 + 52 * val, 90) : off;
+        if (thumb) g2.fillRect(x * k - 1.1, y * k - 1.1, 2.4, 2.4);
+        else { g2.beginPath(); g2.arc(x, y, FULL.pix, 0, Math.PI * 2); g2.fill(); }
+      }
+    });
+  }
+}
+
+function stackTagList(st) {
+  const tags = [], T = (group, label, title) => tags.push({ group, label, title });
+  T('grain', { and: 'Intersect', or: 'Add', shadow: 'Shadow', hue: 'Color band' }[st.blend], BLENDS.find(b => b.id === st.blend).why);
+  const sameDir = st.L1.motion === st.L2.motion && st.L1.path === st.L2.path;
+  if (st.L1.motion === 'static') T('coverage', 'Full light base', 'layer 1 is static');
+  else T('symmetry', st.L1.path === st.L2.path ? 'Same path' : 'Two paths', 'paths of the two layers');
+  if (sameDir && st.L1.rev !== st.L2.rev) T('symmetry', 'Crossing', 'same motion in opposite directions');
+  const ratio = Math.max(st.L1.speed, st.L2.speed) / Math.min(st.L1.speed, st.L2.speed);
+  if (st.L1.motion !== 'static') T('balance', ratio === 1 ? 'Same tempo' : `Tempo ${Math.min(st.L1.speed, st.L2.speed)}:${Math.max(st.L1.speed, st.L2.speed)}`.replace(/(\d+):(\d+)/, (m, a, b) => `${b}:${a}` ) , 'cycle lengths of the two layers');
+  const fast = Math.min(st.L1.motion === 'static' ? 99 : st.L1.speed, st.L2.speed);
+  T('feel', fast <= 1 ? 'Intense' : fast <= 2 ? 'Lively' : 'Calm', 'fastest layer tempo');
+  if (st.layout !== 'all') T('symmetry', S_LAYOUTS.find(l => l.id === st.layout).label, 'two groups');
+  const cost = 1 + (st.L1.motion === 'static' ? 0 : 1) + 1 + (st.blend === 'or' && st.hueOff ? 1 : 0);
+  T('cost', `Cost ${cost}`, 'effects per ring per layer: color + layer 1 + layer 2 (+ snake_hue for a second color)');
+  return tags;
+}
+const stackTags = st => stackTagList(st).map(t => `<span class="tag" title="${t.title}" style="--th:${TAG_COLORS[t.group] ?? 120}">${t.label}</span>`).join('');
+
+function stackCode(st) {
+  const lines = [];
+  const factor = st.blend === 'or' ? (st.style === 'solid' ? K(1) : L(0, 1)) : st.blend === 'shadow' ? (st.style === 'solid' ? K(0) : L(1, 0)) : null;
+  for (const grp of sGroups(st)) {
+    const L1 = flipLayer(st.L1, grp), L2 = flipLayer(st.L2, grp);
+    const rings = st.layout === 'all' ? 'all' : `[${grp.rings.join(', ')}]`;
+    const wrap = (L, body) => `segment(${SEGCONST[L.path]}, () => ${L.wave ? `phase(${L.wave}, () => ` : ''}cycle(${L.speed}, () => ${body})${L.wave ? ')' : ''})`;
+    const b = [`segment(segment_all, () => constColor({ hue: ${hueN(st.hue)} }));`];
+    const c1 = MOTIONS.find(m => m.id === L1.motion).code(L1.rev, L1.tail);
+    if (c1) b.push(wrap(L1, c1) + ';');
+    const sym = motionSym(L2.motion, L2.rev, L2.tail);
+    const snakeBase = `head: ${fmt(sym.head)}, tail_length: ${fmt(sym.tail)}, cyclic: ${sym.cyclic}`;
+    if (st.blend === 'and') b.push(wrap(L2, MOTIONS.find(m => m.id === L2.motion).code(L2.rev, L2.tail)) + ';');
+    else if (st.blend === 'hue') b.push(wrap(L2, `addEffect((p: number) => ({ snake_hue: { ${snakeBase}, offset_factor: ${fmt(st.style === 'solid' ? K(st.hueOff) : L(0, st.hueOff))} } }))`) + ';');
+    else {
+      b.push(wrap(L2, `addEffect((p: number) => ({ snake_brightness: { ${snakeBase}, ${st.blend === 'or' ? 'mult_factor_increase' : 'mult_factor_decrease'}: ${fmt(factor)} } }))`) + ';');
+      if (st.blend === 'or' && st.hueOff) b.push(wrap(L2, `addEffect((p: number) => ({ snake_hue: { ${snakeBase}, offset_factor: ${fmt(K(st.hueOff))} } }))`) + ';   // second color');
+    }
+    lines.push(`  elements(${rings}, () => {\n    ${b.join('\n    ')}\n  });`);
+  }
+  return `beats(0, 16, () => {\n${lines.join('\n')}\n});`;
+}
+
+function sChipRow(parent, label, items, get, set, swatch) {
+  const lab = document.createElement('div'); lab.className = 'label'; lab.textContent = label; parent.appendChild(lab);
+  const row = document.createElement('div'); row.className = 'chips'; parent.appendChild(row);
+  items.forEach(it => {
+    const b = document.createElement('button'); b.textContent = it.label;
+    if (swatch) { b.className = 'swatch'; b.style.background = hsl(it.id); }
+    if (get() === it.id) b.classList.add('on');
+    b.onclick = () => { set(it.id); sSt.preset = null; renderS(); };
+    row.appendChild(b);
+  });
+}
+function renderS() {
+  for (const id of ['sBlendChips', 'sStyleChips', 'sHueOffChips', 'sLayoutChips']) document.getElementById(id).innerHTML = '';
+  const top = (id, items, key) => items.forEach(it => { const b = document.createElement('button'); b.textContent = it.label; if (sSt[key] === it.id) b.classList.add('on');
+    b.onclick = () => { sSt[key] = it.id; sSt.preset = null; renderS(); }; document.getElementById(id).appendChild(b); });
+  top('sBlendChips', BLENDS, 'blend'); top('sStyleChips', STYLES, 'style'); top('sHueOffChips', HUE_OFFS, 'hueOff'); top('sLayoutChips', S_LAYOUTS, 'layout');
+  for (const [key, colId, title, list] of [['L1', 'sColA', 'Layer 1 · snake', MOTIONS_L1], ['L2', 'sColB', 'Layer 2 · ' + BLENDS.find(b => b.id === sSt.blend).label, MOTIONS_L2]]) {
+    const col = document.getElementById(colId); col.innerHTML = `<h3>${title}</h3>`;
+    const L = sSt[key];
+    sChipRow(col, 'Path (segment)', PATHS, () => L.path, v => L.path = v);
+    sChipRow(col, 'Motion', list, () => L.motion, v => L.motion = v);
+    sChipRow(col, 'Direction', DIRS, () => L.rev, v => L.rev = v);
+    sChipRow(col, 'Tail length', TAILS, () => L.tail, v => L.tail = v);
+    sChipRow(col, 'Cycle', SPEEDS, () => L.speed, v => L.speed = v);
+    sChipRow(col, 'Wave across rings', WAVES, () => L.wave, v => L.wave = v);
+    if (key === 'L1') sChipRow(col, 'Color', HUES, () => sSt.hue, v => sSt.hue = v, true);
+  }
+  [...document.getElementById('sPresetChips').children].forEach((b, n) => b.classList.toggle('on', sSt.preset === S_PRESETS[n]));
+  const m1 = MOTIONS.find(m => m.id === sSt.L1.motion), m2 = MOTIONS.find(m => m.id === sSt.L2.motion);
+  document.getElementById('sInfo').innerHTML = `<div class="tags big">${stackTags(sSt)}</div>` +
+    (sSt.preset ? `<p><b>${sSt.preset.label}.</b> ${sSt.preset.why}</p>` : '') +
+    `<p><b>Layer 1:</b> ${m1.label.toLowerCase()} on <code>${sSt.L1.path}</code>. <b>Layer 2:</b> ${m2.label.toLowerCase()} on <code>${sSt.L2.path}</code>, ${BLENDS.find(b => b.id === sSt.blend).why}.</p>`;
+  document.getElementById('sCode').textContent = stackCode(sSt);
+}
+S_PRESETS.forEach(pr => { const b = document.createElement('button'); b.textContent = pr.label; b.onclick = () => loadStack(pr); document.getElementById('sPresetChips').appendChild(b); });
+renderS();
+const fcvS = document.getElementById('fullS'), fctxS = fcvS.getContext('2d');
+
+// Stacked-snake gallery (live, visible cards only)
+const S_CARD_ELS = [];
+function stackGalleryGroup(title, presets) {
+  const lab = document.createElement('div'); lab.className = 'label'; lab.style.marginTop = '20px';
+  lab.innerHTML = `${title} <span style="text-transform:none;letter-spacing:0">(${presets.length})</span>`;
+  const grid = document.createElement('div'); grid.className = 'gallery mgallery';
+  const wrap = document.getElementById('sGalleryWrap'); wrap.appendChild(lab); wrap.appendChild(grid);
+  presets.forEach(pr => {
+    const card = document.createElement('button'); card.className = 'thumb';
+    const cv = document.createElement('canvas'); cv.width = 300; cv.height = 300; card.appendChild(cv);
+    const cap = document.createElement('div'); cap.className = 'cap'; cap.innerHTML = `<b>${pr.label}</b>`;
+    const tg = document.createElement('div'); tg.className = 'tags'; tg.innerHTML = stackTags(pr);
+    const why = document.createElement('div'); why.className = 'why'; why.textContent = pr.why;
+    card.appendChild(cap); card.appendChild(tg); card.appendChild(why);
+    card._tags = stackTagList(pr);
+    card.onclick = () => { loadStack(pr); document.getElementById('panel7').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    grid.appendChild(card); S_CARD_ELS.push(card);
+    const c = { cv, g2: cv.getContext('2d'), stack: pr, visible: !io6 };
+    M_CARDS.push(c); if (io6) io6.observe(cv);
+  });
+}
+stackGalleryGroup('Hand-designed stacks', S_PRESETS);
+stackGalleryGroup('Every blend × layer pairing', S_GENERATED);
+filterBar(document.getElementById('sGalleryWrap'), S_CARD_ELS);
+
+let lastGal = 0;
+function drawMotionGallery(now) {
+  if (now - lastGal < 33) return;
+  lastGal = now;
+  M_CARDS.forEach(c => { if (!c.visible) return; if (c.stack) drawStack(c.g2, c.cv.width, c.stack, now, true); else drawMotionState(c.g2, c.cv.width, c.ms, now, true); });
+}
+
+function frame(now) { drawGeo(now); drawSeg(now); drawFull(now); drawFull4(now); drawMotion(now); drawStack(fctxS, fcvS.width, sSt, now, false); drawMotionGallery(now); requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+// ---- Live to LEDs: panels 6 and 7 send their pattern straight to the Raspberry Pi on every click ----
+// The generated code is run here with a JS port of the led-rings DSL (src/time, src/objects, src/effects,
+// src/animation), giving the same sequence JSON as `new Animation(...).getSequence()` in ts-node.
+// Rings skip re-downloading when the trigger name and guid match what they last played
+// (esp32-animations src/sequence.cpp), so alternate between two names to make each send fresh.
+const LIVE_TRIGGERS = ['layout-demo-a', 'layout-demo-b'];
+let liveCount = 0;
+function buildSequence(code, bpm = BPM, beatsLen = 16) {
+  const effects = [];   // { effect, elements }
+  let store = { effectConfig: { segments: 'all' } };
+  const run = (next, cb) => { const prev = store; store = next; try { cb(); } finally { store = prev; } };
+  const elemPhase = (i, n, x) => x >= 0 ? i / n * x : (n - 1 - i) / n * -x;
+  const PHASE_FIELDS = { timed_hue: ['offset_factor'], position_hue: ['offset_factor'], snake_hue: ['offset_factor'],
+    timed_brightness: ['mult_factor_increase', 'mult_factor_decrease'], position_brightness: ['mult_factor_increase', 'mult_factor_decrease'],
+    snake_brightness: ['mult_factor_increase', 'mult_factor_decrease'], timed_saturation: ['mult_factor_increase', 'mult_factor_decrease'],
+    position_saturation: ['mult_factor_increase', 'mult_factor_decrease'], snake_saturation: ['mult_factor_increase', 'mult_factor_decrease'] };
+  const offsetFF = (ff, o) => {
+    if (!ff || typeof ff !== 'object') return ff;
+    const r = JSON.parse(JSON.stringify(ff));
+    if (r.const_value) r.const_value.value = (r.const_value.value ?? 0) + o;
+    else if (r.linear) { r.linear.start += o; r.linear.end += o; }
+    else if (r.sin) { r.sin.min += o; r.sin.max += o; }
+    else if (r.steps) r.steps.first_step_value = (r.steps.first_step_value ?? 0) + o;
+    else if (r.repeat) r.funcToRepeat = offsetFF(r.funcToRepeat, o);
+    else if (r.half || r.comb2) { r.f1 = offsetFF(r.f1, o); r.f2 = offsetFF(r.f2, o); }
+    return r;
+  };
+  const phaseEffect = (e, ph) => {
+    if (ph === 0) return e;
+    const r = JSON.parse(JSON.stringify(e));
+    for (const [k, fields] of Object.entries(PHASE_FIELDS)) if (r[k]) for (const f of fields) if (r[k][f]) r[k][f] = offsetFF(r[k][f], ph);
+    return r;
+  };
+  const animAdd = e => {   // Animation.addEffect
+    const els = store.elements, ph = store.phase ?? 0;
+    if (typeof e === 'function') { els.forEach((el, i) => effects.push({ effect: e(elemPhase(i, els.length, ph)), elements: [el] })); return; }
+    if (ph !== 0) { els.forEach((el, i) => effects.push({ effect: phaseEffect(e, elemPhase(i, els.length, ph)), elements: [el] })); return; }
+    effects.push({ effect: e, elements: els });
+  };
+  const addEffect = cfg => {
+    const ec = store.effectConfig;
+    if (typeof cfg === 'function') animAdd(ph => ({ effect_config: ec, ...cfg(ph) }));
+    else animAdd({ effect_config: ec, ...cfg });
+  };
+  const beats = (b0, b1, cb) => run({ ...store, effectConfig: { ...store.effectConfig, start_time: Math.round(b0 * 60 / bpm * 1000), end_time: Math.round(b1 * 60 / bpm * 1000) }, sectionBeats: b1 - b0 }, cb);
+  const cycle = (n, cb) => {
+    const total = store.sectionBeats ?? ((store.effectConfig.end_time - store.effectConfig.start_time) / 1000 / 60 * bpm);
+    run({ ...store, effectConfig: { ...store.effectConfig, repeat_num: total / n, repeat_start: 0, repeat_end: 1 } }, cb);
+  };
+  const phase = (x, cb) => run({ ...store, effectConfig: { ...store.effectConfig }, phase: x }, cb);
+  const segment = (name, cb) => run({ ...store, effectConfig: { ...store.effectConfig, segments: name } }, cb);
+  const elements = (e, cb) => run({ elements: e, ...store, effectConfig: { ...store.effectConfig } }, cb);
+  const constColor = o => { const hue = o?.hue ?? 0.4, sat = o?.sat ?? 1, val = o?.val ?? 1; addEffect(ph => ({ const_color: { color: { hue: hue + ph, sat, val } } })); };
+  const brightness = o => addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: o.value } } } });
+  const snake = ({ tailLength, cyclic, reverse }) => addEffect(ph => ({ snake: { head: { linear: { start: reverse ? ph + 1 : ph, end: reverse ? ph : ph + 1 } }, tail_length: { const_value: { value: tailLength ?? 0.5 } }, cyclic: cyclic ?? false } }));
+  const snakeInOut = () => addEffect(ph => ({ snake: { head: { sin: { min: 0, max: 1, phase: ph, repeats: 1 } }, tail_length: { const_value: { value: 0.5 } } } }));
+  const snakeSlowFast = ({ tailLength }) => addEffect(ph => ({ snake: { head: { comb2: { f1: { sin: { min: 0, max: 1, phase: ph, repeats: 1 } }, amount1: 1, f2: { linear: { start: 0, end: 1 } }, amount2: 1 } }, tail_length: { const_value: { value: tailLength ?? 0.5 } }, cyclic: true } }));
+  const snakeTailShrinkGrow = () => addEffect(ph => ({ snake: { head: { sin: { min: 0, max: 1, phase: ph, repeats: 1 } }, tail_length: { half: { f1: { linear: { start: 0.5, end: 1 } }, f2: { linear: { start: 1, end: 0.5 } } } }, cyclic: true } }));
+  const snakeHeadSteps = ({ steps, tailLength }) => addEffect(ph => ({ snake: { head: { steps: { num_steps: steps, diff_per_step: 1 / steps, first_step_value: ph } }, tail_length: { const_value: { value: tailLength ?? 0.5 } }, cyclic: true } }));
+  const lib = { beats, cycle, phase, segment, elements, addEffect, constColor, brightness, snake, snakeInOut, snakeSlowFast, snakeTailShrinkGrow, snakeHeadSteps,
+    all: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], ...Object.fromEntries(Object.values(SEGCONST).map(c => [c, c.slice(8)])) };
+  const js = code.replace(/\((\w+): number\)/g, '($1)');   // drop TS type annotations
+  new Function(...Object.keys(lib), js)(...Object.values(lib));
+  const seq = {};
+  for (const { effect, elements: els } of effects) for (const el of els) {
+    (seq[`ring${el}`] ??= { effects: [], duration_ms: beatsLen * 60 / bpm * 1000, num_repeats: 0 }).effects.push(effect);
+  }
+  return seq;
+}
+
+const liveEl = id => document.getElementById(id);
+try { const h = localStorage.getItem('liveHost'); if (h) liveEl('liveHost').value = h; liveEl('liveOn').checked = localStorage.getItem('liveOn') !== '0'; } catch {}
+liveEl('liveHost').onchange = () => { try { localStorage.setItem('liveHost', liveEl('liveHost').value.trim()); } catch {} };
+liveEl('liveOn').onchange = () => { try { localStorage.setItem('liveOn', liveEl('liveOn').checked ? '1' : '0'); } catch {} };
+const liveStatus = (t, err) => { const el = liveEl('liveSt'); el.textContent = t; el.classList.toggle('err', !!err); };
+const piUrl = port => `http://${liveEl('liveHost').value.trim().replace(/^https?:\/\//, '').replace(/[:/].*$/, '')}:${port}`;
+// The trigger service sends no CORS headers: a no-cors text/plain POST still reaches it, but its reply can't be read.
+const piTrigger = path => fetch(piUrl(8083) + path, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ start_offset_ms: 0 }) });
+// Panel 2 (and the panel 4 gallery, which loads into it) → sequence. Each ring's A/B/off pixel map is expressed with
+// real segments: whole ring, small rings "0".."11", b1/b2, or an inside split's segment plus a position mask
+// (the same FloatFunctions as INSIDE_HUE). Every plan is checked pixel by pixel against split.f before it is used.
+const SPLIT_MASKS = {   // inside split id -> [segment, (a, b) => FloatFunction that is a on s0 and b on s1]
+  io: ['ind', (a, b) => ({ half: { f1: { half: { f1: K(a), f2: K(b) } }, f2: { half: { f1: K(b), f2: K(a) } } } })],
+  pin: ['ind', (a, b) => ({ half: { f1: K(a), f2: K(b) } })],
+  teeth: ['ind', (a, b) => S(a, b, 0.75, 6)],
+  moons: ['arc', (a, b) => ({ half: { f1: K(a), f2: K(b) } })],
+  stripes: ['centric', (a, b) => S(a, b, 0.75, 6)],
+  stars: ['rand', (a, b) => ({ half: { f1: K(a), f2: K(b) } })],
+  sunlit: ['updown', (a, b) => ({ half: { f1: K(a), f2: K(b) } })],
+};
+const evalFF = (f, x) => f.const_value ? f.const_value.value
+  : f.half ? (x < 0.5 ? evalFF(f.half.f1, x * 2) : evalFF(f.half.f2, (x - 0.5) * 2))
+  : f.sin ? f.sin.min + (f.sin.max - f.sin.min) * (Math.sin((x * f.sin.repeats + f.sin.phase) * 2 * Math.PI) + 1) / 2 : NaN;
+function ringPlan(split, r) {
+  const P = []; for (let i = 0; i < 144; i++) P.push(split.f(r, Math.floor(i / 12), i) ?? null);
+  const uniform = idx => idx.every(i => P[i] === P[idx[0]]);
+  const all = [...Array(144).keys()];
+  if (uniform(all)) return { segs: [['all', P[0]]] };
+  for (const ins of INSIDE) {
+    if (ins.id === 'whole') continue;
+    const s0 = all.filter(i => ins.s0(Math.floor(i / 12), i)), s1 = all.filter(i => !ins.s0(Math.floor(i / 12), i));
+    if (!s0.length || !s1.length || !uniform(s0) || !uniform(s1)) continue;
+    const X = P[s0[0]], Y = P[s1[0]];
+    if (ins.id === 'dots') return { segs: [['b1', X], ['b2', Y]] };
+    const [seg, fn] = SPLIT_MASKS[ins.id], f = fn(0, 1);
+    if (all.every(i => Math.round(evalFF(f, SEGMENTS[seg][i])) === (ins.s0(Math.floor(i / 12), i) ? 0 : 1))) return { seg, fn, X, Y };
+  }
+  const smalls = [...Array(12).keys()];
+  if (smalls.every(k => uniform(all.slice(k * 12, k * 12 + 12)))) return { segs: smalls.map(k => [String(k), P[k * 12]]) };
+  return null;
+}
+function splitSequence(split, use, beatsLen = 16) {
+  const T = beatsLen * BEAT_MS, hue = p => r3((p === 'A' ? HA : HB) / 360);
+  // Brightness of each part per time window: [cycle beats, [[start, end, vA, vB], ...]]; off parts are always 0.
+  const [cyc, wins] = use === 'beats' ? [2, [[0, 0.5, 1, 0], [0.5, 1, 0, 1]]]
+    : use === 'conv' ? [8, [[0, 0.5, 1, 0.08], [0.5, 1, 0.08, 1]]] : [beatsLen, [[0, 1, 1, 1]]];
+  const v = (p, w) => p === 'A' ? w[2] : p === 'B' ? w[3] : 0;
+  const cfg = (segments, w) => ({ segments, start_time: 0, end_time: T, ...(w && cyc < beatsLen ? { repeat_num: beatsLen / cyc, repeat_start: w[0], repeat_end: w[1] } : {}) });
+  const dim = (segments, w, f) => ({ effect_config: cfg(segments, w), [typeof f === 'number' ? 'timed_brightness' : 'position_brightness']: { mult_factor_decrease: typeof f === 'number' ? K(f) : f } });
+  const seq = {};
+  for (let r = 1; r <= 12; r++) {
+    const plan = ringPlan(split, r);
+    if (!plan) throw new Error(`ring ${r} of this layout has no segment recipe`);
+    const fx = [];
+    if (plan.segs) {
+      for (const [sg, p] of plan.segs) if (p) fx.push({ effect_config: cfg(sg), const_color: { color: { hue: hue(p), sat: 1, val: 1 } } });
+      for (const w of wins) for (const [sg, p] of plan.segs) if (p && v(p, w) < 1) fx.push(dim(sg, w, v(p, w)));
+    } else {
+      const { seg, fn, X, Y } = plan, base = X || Y;
+      fx.push({ effect_config: cfg(seg), const_color: { color: { hue: hue(base), sat: 1, val: 1 } } });
+      if (X && Y && X !== Y) fx.push({ effect_config: cfg(seg), position_hue: { offset_factor: fn(0, r3(((hue(Y) - hue(X)) % 1 + 1) % 1)) } });
+      for (const w of wins) if (v(X, w) < 1 || v(Y, w) < 1) fx.push(dim(seg, w, fn(v(X, w), v(Y, w))));
+    }
+    // Beat pulse like the preview: a fade on every beat (gentle for steady colors).
+    fx.push({ effect_config: { segments: 'all', start_time: 0, end_time: T, repeat_num: beatsLen, repeat_start: 0, repeat_end: 1 },
+      timed_brightness: { mult_factor_decrease: L(1, use === 'colors' ? 0.75 : 0.05) } });
+    seq[`ring${r}`] = { effects: fx, duration_ms: T, num_repeats: 0 };
+  }
+  return seq;
+}
+
+let liveBusy = false, liveNext = null, liveLast = null, liveLastPanel = 'mCode';
+async function liveSend(seq, label) {
+  const key = JSON.stringify(seq);
+  const body = JSON.stringify(seq.ring1 ? { ...seq, ring0: seq.ring1 } : seq);   // virtual ring0 plays ring1's effects; sent only, never drawn
+  if (liveBusy) { liveNext = [seq, label]; return; }   // keep only the latest click while one is in flight
+  liveBusy = true; liveLast = key;
+  liveStatus(`sending ${label}…`);
+  try {
+    const trig = LIVE_TRIGGERS[liveCount % 2];
+    const res = await fetch(`${piUrl(8082)}/triggers/${trig}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body });
+    if (!res.ok) throw new Error(`sequence service: HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
+    await piTrigger(`/trigger/${trig}`);
+    liveCount++;
+    liveStatus(`#${liveCount} sent ${label} to ${piUrl(8082).slice(7, -5)}`);
+  } catch (e) {
+    liveStatus(e instanceof TypeError ? `Pi not reachable at ${piUrl(8082)}` : 'failed: ' + e.message, true);
+    console.error('Live send failed', e);
+  }
+  liveBusy = false;
+  if (liveNext) { const [q, l] = liveNext; liveNext = null; if (JSON.stringify(q) !== liveLast) liveSend(q, l); }
+}
+// What each sendable panel plays: [label, () => sequence].
+const LIVE_PANELS = {
+  split: () => [`${segSt.split.name || segSt.split.label || segSt.split.caption || 'panel 2 layout'} · ${segSt.use.label}`, () => splitSequence(segSt.split, segSt.use.id)],
+  mCode: () => [mSt.preset?.label ?? 'panel 6 pattern', () => buildSequence(liveEl('mCode').textContent)],
+  sCode: () => [sSt.preset?.label ?? 'panel 7 pattern', () => buildSequence(liveEl('sCode').textContent)],
+};
+const panelOf = sec => !sec ? null : sec.querySelector('#full, #gallery') ? 'split' : sec.querySelector('#mCode') ? 'mCode' : sec.querySelector('#sCode') ? 'sCode' : null;
+function liveFire(id, force) {
+  const [label, build] = LIVE_PANELS[id]();
+  let seq;
+  try { seq = build(); } catch (e) { liveStatus(`can't send ${label}: ${e.message}`, true); return; }
+  if (force) liveLast = null;
+  if (JSON.stringify(seq) !== liveLast) liveSend(seq, label);
+}
+// Capture phase finds the panel before the click handler re-renders (and detaches) the clicked chip;
+// the pattern is read on the next task, after the handler has updated it.
+document.addEventListener('click', e => {
+  if (e.target.closest('.live')) return;
+  const sec = e.target.closest('section'), id = panelOf(sec);
+  if (!id) { if (sec) liveStatus('panels 2, 4, 6 and 7 can be sent to the LEDs'); return; }
+  liveLastPanel = id;   // tracked even when live is off, so Send sends what was clicked last
+  if (!liveEl('liveOn').checked) { setTimeout(() => liveStatus(`live off · Send to play ${LIVE_PANELS[id]()[0]}`)); return; }
+  setTimeout(() => liveFire(id));
+}, true);
+liveEl('liveSend').onclick = () => liveFire(liveLastPanel, true);
+// Random: click a random visible gallery card (panel 4 layouts, panel 6 motions, panel 7 stacked snakes),
+// which loads it into its editor; send it even when live is off.
+liveEl('liveRandom').onclick = () => {
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const galleries = ['#gallery', '#mGalleryWrap', '#sGalleryWrap'].map(g => [...document.querySelectorAll(g + ' .thumb')].filter(c => c.offsetParent)).filter(g => g.length);
+  if (!galleries.length) return;
+  const card = pick(pick(galleries)), id = panelOf(card.closest('section'));   // each gallery equally likely
+  card.click();
+  liveLastPanel = id;
+  if (!liveEl('liveOn').checked) setTimeout(() => liveFire(id, true));
+};
+liveEl('liveStop').onclick = async () => {
+  try { await piTrigger('/stop'); liveLast = null; liveStatus('stopped'); } catch (e) { liveStatus('stop failed: ' + e.message, true); }
+};
+// Global brightness: the rings read a retained MQTT 'brightness' message; browsers can't speak MQTT,
+// so this goes through the control server's /api/brightness bridge (yarn control-server, MQTT_BROKER set).
+const BRI_API = 'http://localhost:3080/api/brightness';
+let briTimer = null;
+const briShow = v => { liveEl('liveBri').value = Math.round(v * 100); liveEl('liveBriVal').textContent = Math.round(v * 100) + '%'; };
+async function briLoad() {
+  try {
+    const d = await (await fetch(BRI_API)).json();
+    if (!d.connected) throw new Error('MQTT not connected');
+    liveEl('liveBri').disabled = false; briShow(d.value);
+  } catch (e) {
+    liveEl('liveBri').disabled = true; liveEl('liveBriVal').textContent = '–';
+    liveEl('liveBri').parentElement.title = `Brightness needs the control server with MQTT_BROKER set (yarn control-server): ${e.message}`;
+  }
+}
+liveEl('liveBri').oninput = () => {
+  const v = liveEl('liveBri').value / 100;
+  liveEl('liveBriVal').textContent = Math.round(v * 100) + '%';
+  clearTimeout(briTimer);
+  briTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(BRI_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: v }) });
+      const d = await res.json();
+      if (!res.ok || !d.connected) throw new Error(d.error || 'MQTT not connected');
+      liveStatus(`brightness ${Math.round(d.value * 100)}%`);
+    } catch (e) { liveStatus('brightness failed: ' + e.message, true); briLoad(); }
+  }, 120);
+};
+briLoad();
+</script>
+</body>
+</html>
